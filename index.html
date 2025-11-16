@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="0; url=/pages/index.html">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게임 업데이트 트래커</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            text-align: center;
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid white;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>게임 업데이트 트래커</h1>
+        <div class="spinner"></div>
+        <p>페이지를 로드하는 중...</p>
+        <p><a href="/pages/index.html" style="color: white;">자동으로 이동되지 않으면 여기를 클릭하세요</a></p>
+    </div>
+    <script>
+        // JavaScript로도 리다이렉트 보장
+        setTimeout(function() {
+            window.location.href = '/pages/index.html';
+        }, 100);
+    </script>
+</body>
+</html>
