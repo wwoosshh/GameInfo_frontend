@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>프로필 - GameInfo</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <style>
+        /* 프로필 헤더 */
+        .profile-header {
+            border-bottom: 2px solid var(--divider);
+            padding-bottom: 32px;
+            margin-bottom: 32px;
+        }
+
+        .profile-info {
+            display: flex;
+            gap: 24px;
+            align-items: start;
+            margin-bottom: 24px;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: var(--bg-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        .profile-details {
+            flex: 1;
+        }
+
+        .profile-username {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            letter-spacing: -0.02em;
+        }
+
+        .profile-email {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+
+        .profile-bio {
+            font-size: 14px;
+            color: var(--text-primary);
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .profile-badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 4px 12px;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge.admin {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--accent-red);
+        }
+
+        .badge.verified {
+            background: rgba(96, 165, 250, 0.2);
+            color: var(--accent-blue);
+        }
+
+        /* 프로필 통계 */
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+        }
+
+        .stat-item {
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent-blue);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* 탭 메뉴 */
+        .tab-menu {
+            display: flex;
+            gap: 4px;
+            border-bottom: 2px solid var(--divider);
+            margin-bottom: 24px;
+        }
+
+        .tab-button {
+            padding: 12px 20px;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: -2px;
+        }
+
+        .tab-button:hover {
+            color: var(--text-primary);
+        }
+
+        .tab-button.active {
+            color: var(--accent-blue);
+            border-bottom-color: var(--accent-blue);
+        }
+
+        /* 탭 컨텐츠 */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* 게시글/댓글 리스트 */
+        .item-list {
+            border-top: 1px solid var(--divider);
+        }
+
+        .item {
+            padding: 20px 0;
+            border-bottom: 1px solid var(--divider);
+            transition: var(--transition);
+        }
+
+        .item:hover {
+            background: var(--bg-hover);
+            margin: 0 -16px;
+            padding: 20px 16px;
+        }
+
+        .item-meta {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .item-meta .category {
+            padding: 2px 8px;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--accent-blue);
+        }
+
+        .item-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-primary);
+            line-height: 1.4;
+            cursor: pointer;
+        }
+
+        .item-title:hover {
+            color: var(--accent-blue);
+        }
+
+        .item-content {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            line-height: 1.5;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .item-stats {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* 신고 내역 */
+        .report-item {
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .report-type {
+            padding: 4px 10px;
+            background: var(--bg-primary);
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .report-status {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .report-status.pending {
+            background: rgba(251, 191, 36, 0.2);
+            color: var(--accent-yellow);
+        }
+
+        .report-status.resolved {
+            background: rgba(52, 211, 153, 0.2);
+            color: var(--accent-green);
+        }
+
+        .report-status.rejected {
+            background: rgba(156, 163, 175, 0.2);
+            color: var(--text-muted);
+        }
+
+        .report-content {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .report-reason {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* 페이지네이션 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 32px;
+            padding: 24px 0;
+        }
+
+        .pagination button,
+        .pagination span {
+            padding: 8px 12px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--divider);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 로딩 및 빈 상태 */
+        .loading {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--text-muted);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 64px 24px;
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="main-header">
+        <div class="container">
+            <div class="header-content">
+                <h1 class="site-title">
+                    <a href="index.html">GameInfo</a>
+                </h1>
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="index.html">홈</a></li>
+                        <li><a href="calendar.html">캘린더</a></li>
+                        <li><a href="games.html">게임 목록</a></li>
+                        <li id="nav-community"><a href="community.html">커뮤니티</a></li>
+                        <li id="nav-admin" style="display:none;"><a href="admin.html">관리자</a></li>
+                        <li id="nav-profile" style="display:none;"><a href="profile.html">프로필</a></li>
+                        <li id="nav-login"><a href="login.html">로그인</a></li>
+                        <li id="nav-logout" style="display:none;"><a href="#" onclick="handleLogout(event)">로그아웃</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="main-content">
+        <div class="container">
+            <!-- 프로필 헤더 -->
+            <section class="profile-header">
+                <div class="profile-info">
+                    <div id="profile-avatar" class="profile-avatar"></div>
+                    <div class="profile-details">
+                        <h2 id="profile-username" class="profile-username">사용자</h2>
+                        <div id="profile-email" class="profile-email"></div>
+                        <div id="profile-bio" class="profile-bio"></div>
+                        <div id="profile-badges" class="profile-badges"></div>
+                    </div>
+                </div>
+
+                <!-- 통계 -->
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <div id="stat-posts" class="stat-value">0</div>
+                        <div class="stat-label">작성한 게시글</div>
+                    </div>
+                    <div class="stat-item">
+                        <div id="stat-comments" class="stat-value">0</div>
+                        <div class="stat-label">작성한 댓글</div>
+                    </div>
+                    <div class="stat-item">
+                        <div id="stat-likes" class="stat-value">0</div>
+                        <div class="stat-label">받은 좋아요</div>
+                    </div>
+                    <div class="stat-item">
+                        <div id="stat-bookmarks" class="stat-value">0</div>
+                        <div class="stat-label">북마크</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 탭 메뉴 -->
+            <div class="tab-menu">
+                <button class="tab-button active" onclick="switchTab('posts')">게시글</button>
+                <button class="tab-button" onclick="switchTab('comments')">댓글</button>
+                <button class="tab-button" onclick="switchTab('likes')">좋아요</button>
+                <button class="tab-button" onclick="switchTab('bookmarks')">북마크</button>
+                <button class="tab-button" onclick="switchTab('reports')">신고 내역</button>
+            </div>
+
+            <!-- 탭 컨텐츠 -->
+            <div id="tab-posts" class="tab-content active">
+                <div id="posts-list" class="item-list">
+                    <div class="loading">로딩 중...</div>
+                </div>
+                <div id="posts-pagination" class="pagination"></div>
+            </div>
+
+            <div id="tab-comments" class="tab-content">
+                <div id="comments-list" class="item-list">
+                    <div class="loading">로딩 중...</div>
+                </div>
+                <div id="comments-pagination" class="pagination"></div>
+            </div>
+
+            <div id="tab-likes" class="tab-content">
+                <div id="likes-list" class="item-list">
+                    <div class="loading">로딩 중...</div>
+                </div>
+                <div id="likes-pagination" class="pagination"></div>
+            </div>
+
+            <div id="tab-bookmarks" class="tab-content">
+                <div id="bookmarks-list" class="item-list">
+                    <div class="loading">로딩 중...</div>
+                </div>
+                <div id="bookmarks-pagination" class="pagination"></div>
+            </div>
+
+            <div id="tab-reports" class="tab-content">
+                <div id="reports-list">
+                    <div class="loading">로딩 중...</div>
+                </div>
+                <div id="reports-pagination" class="pagination"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 푸터 -->
+    <footer class="main-footer">
+        <div class="container">
+            <p>&copy; 2025 GameInfo. 대학교 과제 프로젝트</p>
+            <p>모든 게임 관련 상표는 해당 소유자의 자산입니다.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="../js/api.js"></script>
+    <script src="../js/navigation.js"></script>
+    <script>
+        let currentTab = 'posts';
+        let currentPages = {
+            posts: 1,
+            comments: 1,
+            likes: 1,
+            bookmarks: 1,
+            reports: 1
+        };
+
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', async () => {
+            // 로그인 확인
+            if (!requireLogin()) {
+                return;
+            }
+
+            await loadProfile();
+            await loadTabContent('posts');
+        });
+
+        // 프로필 정보 로드
+        async function loadProfile() {
+            try {
+                const response = await fetch(`${API.baseURL}/profile`, {
+                    headers: API.getHeaders()
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.data) {
+                    const profile = data.data;
+
+                    // 아바타
+                    const avatarEl = document.getElementById('profile-avatar');
+                    if (profile.avatar_url) {
+                        avatarEl.innerHTML = `<img src="${profile.avatar_url}" alt="Avatar" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+                    } else {
+                        avatarEl.textContent = profile.display_name ? profile.display_name[0].toUpperCase() : profile.username[0].toUpperCase();
+                    }
+
+                    // 사용자 정보
+                    document.getElementById('profile-username').textContent = profile.display_name || profile.username;
+                    document.getElementById('profile-email').textContent = profile.email;
+
+                    if (profile.bio) {
+                        document.getElementById('profile-bio').textContent = profile.bio;
+                    } else {
+                        document.getElementById('profile-bio').textContent = '자기소개가 없습니다.';
+                    }
+
+                    // 배지
+                    const badgesEl = document.getElementById('profile-badges');
+                    if (profile.is_admin) {
+                        badgesEl.innerHTML += '<span class="badge admin">관리자</span>';
+                    }
+                    if (profile.email_verified) {
+                        badgesEl.innerHTML += '<span class="badge verified">인증됨</span>';
+                    }
+
+                    // 통계
+                    if (profile.stats) {
+                        document.getElementById('stat-posts').textContent = profile.stats.posts_count || 0;
+                        document.getElementById('stat-comments').textContent = profile.stats.comments_count || 0;
+                        document.getElementById('stat-likes').textContent = profile.stats.likes_received || 0;
+                        document.getElementById('stat-bookmarks').textContent = profile.stats.bookmarks_count || 0;
+                    }
+                } else {
+                    console.error('Failed to load profile:', data.message);
+                }
+            } catch (error) {
+                console.error('Failed to load profile:', error);
+            }
+        }
+
+        // 탭 전환
+        function switchTab(tab) {
+            // 탭 버튼 활성화
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // 탭 컨텐츠 표시
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`tab-${tab}`).classList.add('active');
+
+            currentTab = tab;
+            loadTabContent(tab);
+        }
+
+        // 탭 컨텐츠 로드
+        async function loadTabContent(tab, page = 1) {
+            currentPages[tab] = page;
+
+            switch (tab) {
+                case 'posts':
+                    await loadPosts(page);
+                    break;
+                case 'comments':
+                    await loadComments(page);
+                    break;
+                case 'likes':
+                    await loadLikes(page);
+                    break;
+                case 'bookmarks':
+                    await loadBookmarks(page);
+                    break;
+                case 'reports':
+                    await loadReports(page);
+                    break;
+            }
+        }
+
+        // 게시글 목록 로드
+        async function loadPosts(page = 1) {
+            const listEl = document.getElementById('posts-list');
+            listEl.innerHTML = '<div class="loading">로딩 중...</div>';
+
+            try {
+                const response = await fetch(`${API.baseURL}/profile/posts?page=${page}&limit=20`, {
+                    headers: API.getHeaders()
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.data) {
+                    displayPosts(data.data.posts);
+                    displayPagination('posts', data.data.pagination);
+                } else {
+                    listEl.innerHTML = '<div class="empty-state"><h3>게시글이 없습니다</h3></div>';
+                }
+            } catch (error) {
+                console.error('Failed to load posts:', error);
+                listEl.innerHTML = '<div class="empty-state"><h3>게시글을 불러올 수 없습니다</h3></div>';
+            }
+        }
+
+        // 게시글 표시
+        function displayPosts(posts) {
+            const listEl = document.getElementById('posts-list');
+
+            if (posts.length === 0) {
+                listEl.innerHTML = '<div class="empty-state"><h3>작성한 게시글이 없습니다</h3></div>';
+                return;
+            }
+
+            listEl.innerHTML = posts.map(post => `
+                <div class="item">
+                    <div class="item-meta">
+                        <span class="category">${getCategoryName(post.category)}</span>
+                        ${post.game_name ? `<span class="game-name">${escapeHtml(post.game_name)}</span>` : ''}
+                        <span class="separator">|</span>
+                        <span>${formatDate(post.created_at)}</span>
+                    </div>
+                    <div class="item-title" onclick="window.location.href='community_post.html?id=${post.post_id}'">${escapeHtml(post.title)}</div>
+                    <div class="item-content">${escapeHtml(post.content)}</div>
+                    <div class="item-stats">
+                        <span>조회 ${post.view_count || 0}</span>
+                        <span>댓글 ${post.comment_count || 0}</span>
+                        <span>좋아요 ${post.like_count || 0}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 댓글 목록 로드
+        async function loadComments(page = 1) {
+            const listEl = document.getElementById('comments-list');
+            listEl.innerHTML = '<div class="loading">로딩 중...</div>';
+
+            try {
+                const response = await fetch(`${API.baseURL}/profile/comments?page=${page}&limit=20`, {
+                    headers: API.getHeaders()
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.data) {
+                    displayComments(data.data.comments);
+                    displayPagination('comments', data.data.pagination);
+                } else {
+                    listEl.innerHTML = '<div class="empty-state"><h3>댓글이 없습니다</h3></div>';
+                }
+            } catch (error) {
+                console.error('Failed to load comments:', error);
+                listEl.innerHTML = '<div class="empty-state"><h3>댓글을 불러올 수 없습니다</h3></div>';
+            }
+        }
+
+        // 댓글 표시
+        function displayComments(comments) {
+            const listEl = document.getElementById('comments-list');
+
+            if (comments.length === 0) {
+                listEl.innerHTML = '<div class="empty-state"><h3>작성한 댓글이 없습니다</h3></div>';
+                return;
+            }
+
+            listEl.innerHTML = comments.map(comment => `
+                <div class="item">
+                    <div class="item-meta">
+                        <span>게시글: ${escapeHtml(comment.post_title)}</span>
+                        <span class="separator">|</span>
+                        <span>${formatDate(comment.created_at)}</span>
+                    </div>
+                    <div class="item-content" onclick="window.location.href='community_post.html?id=${comment.post_id}'">${escapeHtml(comment.content)}</div>
+                </div>
+            `).join('');
+        }
+
+        // 좋아요한 게시글 로드
+        async function loadLikes(page = 1) {
+            const listEl = document.getElementById('likes-list');
+            listEl.innerHTML = '<div class="loading">로딩 중...</div>';
+
+            try {
+                const response = await fetch(`${API.baseURL}/profile/likes?page=${page}&limit=20`, {
+                    headers: API.getHeaders()
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.data) {
+                    displayLikes(data.data.likes);
+                    displayPagination('likes', data.data.pagination);
+                } else {
+                    listEl.innerHTML = '<div class="empty-state"><h3>좋아요한 게시글이 없습니다</h3></div>';
+                }
+            } catch (error) {
+                console.error('Failed to load likes:', error);
+                listEl.innerHTML = '<div class="empty-state"><h3>좋아요 목록을 불러올 수 없습니다</h3></div>';
+            }
+        }
+
+        // 좋아요 표시
+        function displayLikes(likes) {
+            const listEl = document.getElementById('likes-list');
+
+            if (likes.length === 0) {
+                listEl.innerHTML = '<div class="empty-state"><h3>좋아요한 게시글이 없습니다</h3></div>';
+                return;
+            }
+
+            listEl.innerHTML = likes.map(like => `
+                <div class="item">
+                    <div class="item-meta">
+                        <span class="category">${getCategoryName(like.category)}</span>
+                        ${like.game_name ? `<span class="game-name">${escapeHtml(like.game_name)}</span>` : ''}
+                        <span class="separator">|</span>
+                        <span>${formatDate(like.liked_at)}</span>
+                    </div>
+                    <div class="item-title" onclick="window.location.href='community_post.html?id=${like.post_id}'">${escapeHtml(like.title)}</div>
+                    <div class="item-content">${escapeHtml(like.content)}</div>
+                    <div class="item-stats">
+                        <span>조회 ${like.view_count || 0}</span>
+                        <span>댓글 ${like.comment_count || 0}</span>
+                        <span>좋아요 ${like.like_count || 0}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 북마크 목록 로드
+        async function loadBookmarks(page = 1) {
+            const listEl = document.getElementById('bookmarks-list');
+            listEl.innerHTML = '<div class="loading">로딩 중...</div>';
+
+            try {
+                const response = await fetch(`${API.baseURL}/bookmarks?page=${page}&limit=20`, {
+                    headers: API.getHeaders()
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.data) {
+                    displayBookmarks(data.data.bookmarks);
+                    // 북마크 API는 pagination 정보가 없을 수 있으므로 확인 필요
+                } else {
+                    listEl.innerHTML = '<div class="empty-state"><h3>북마크한 게시글이 없습니다</h3></div>';
+                }
+            } catch (error) {
+                console.error('Failed to load bookmarks:', error);
+                listEl.innerHTML = '<div class="empty-state"><h3>북마크 목록을 불러올 수 없습니다</h3></div>';
+            }
+        }
+
+        // 북마크 표시
+        function displayBookmarks(bookmarks) {
+            const listEl = document.getElementById('bookmarks-list');
+
+            if (!bookmarks || bookmarks.length === 0) {
+                listEl.innerHTML = '<div class="empty-state"><h3>북마크한 게시글이 없습니다</h3></div>';
+                return;
+            }
+
+            listEl.innerHTML = bookmarks.map(bookmark => `
+                <div class="item">
+                    <div class="item-meta">
+                        <span class="category">${getCategoryName(bookmark.category)}</span>
+                        ${bookmark.game_name ? `<span class="game-name">${escapeHtml(bookmark.game_name)}</span>` : ''}
+                        <span class="separator">|</span>
+                        <span>${formatDate(bookmark.bookmarked_at || bookmark.created_at)}</span>
+                    </div>
+                    <div class="item-title" onclick="window.location.href='community_post.html?id=${bookmark.post_id}'">${escapeHtml(bookmark.title)}</div>
+                    <div class="item-content">${escapeHtml(bookmark.content)}</div>
+                    <div class="item-stats">
+                        <span>조회 ${bookmark.view_count || 0}</span>
+                        <span>댓글 ${bookmark.comment_count || 0}</span>
+                        <span>좋아요 ${bookmark.like_count || 0}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 신고 내역 로드
+        async function loadReports(page = 1) {
+            const listEl = document.getElementById('reports-list');
+            listEl.innerHTML = '<div class="loading">로딩 중...</div>';
+
+            try {
+                const response = await fetch(`${API.baseURL}/profile/reports?page=${page}&limit=20`, {
+                    headers: API.getHeaders()
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.data) {
+                    displayReports(data.data.reports);
+                    displayPagination('reports', data.data.pagination);
+                } else {
+                    listEl.innerHTML = '<div class="empty-state"><h3>신고 내역이 없습니다</h3></div>';
+                }
+            } catch (error) {
+                console.error('Failed to load reports:', error);
+                listEl.innerHTML = '<div class="empty-state"><h3>신고 내역을 불러올 수 없습니다</h3></div>';
+            }
+        }
+
+        // 신고 표시
+        function displayReports(reports) {
+            const listEl = document.getElementById('reports-list');
+
+            if (reports.length === 0) {
+                listEl.innerHTML = '<div class="empty-state"><h3>신고한 내역이 없습니다</h3></div>';
+                return;
+            }
+
+            listEl.innerHTML = reports.map(report => `
+                <div class="report-item">
+                    <div class="report-header">
+                        <span class="report-type">${report.reported_type === 'post' ? '게시글' : '댓글'} 신고</span>
+                        <span class="report-status ${report.status}">${getStatusName(report.status)}</span>
+                    </div>
+                    <div class="report-content">${escapeHtml(report.reported_content || '삭제된 컨텐츠')}</div>
+                    <div class="report-reason">사유: ${escapeHtml(report.reason)}</div>
+                    <div class="item-meta">
+                        <span>${formatDate(report.created_at)}</span>
+                        ${report.resolved_at ? `<span class="separator">|</span><span>처리일: ${formatDate(report.resolved_at)}</span>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 페이지네이션 표시
+        function displayPagination(tab, pagination) {
+            if (!pagination) return;
+
+            const paginationEl = document.getElementById(`${tab}-pagination`);
+            const { current_page, total_pages } = pagination;
+
+            if (total_pages <= 1) {
+                paginationEl.innerHTML = '';
+                return;
+            }
+
+            let html = `
+                <button onclick="loadTabContent('${tab}', ${current_page - 1})" ${current_page === 1 ? 'disabled' : ''}>이전</button>
+                <span>페이지 ${current_page} / ${total_pages}</span>
+                <button onclick="loadTabContent('${tab}', ${current_page + 1})" ${current_page === total_pages ? 'disabled' : ''}>다음</button>
+            `;
+
+            paginationEl.innerHTML = html;
+        }
+
+        // 유틸리티 함수
+        function getCategoryName(category) {
+            const names = {
+                'discussion': '자유',
+                'guide': '가이드',
+                'news': '소식',
+                'question': '질문',
+                'humor': '유머',
+                'fanart': '팬아트'
+            };
+            return names[category] || category;
+        }
+
+        function getStatusName(status) {
+            const names = {
+                'pending': '검토 중',
+                'resolved': '처리 완료',
+                'rejected': '반려됨'
+            };
+            return names[status] || status;
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = Math.floor((now - date) / 1000);
+
+            if (diff < 60) return '방금 전';
+            if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;
+            if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
+            if (diff < 604800) return `${Math.floor(diff / 86400)}일 전`;
+
+            return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

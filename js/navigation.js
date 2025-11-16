@@ -13,9 +13,13 @@ function getCurrentPage() {
 // 네비게이션 상태 업데이트
 function updateNavigation() {
     const token = localStorage.getItem('authToken');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+
     const navLogin = document.getElementById('nav-login');
     const navLogout = document.getElementById('nav-logout');
     const navCommunity = document.getElementById('nav-community');
+    const navProfile = document.getElementById('nav-profile');
+    const navAdmin = document.getElementById('nav-admin');
     const navUser = document.getElementById('nav-user');
 
     // 요소가 없으면 종료 (로그인 페이지 등)
@@ -26,18 +30,28 @@ function updateNavigation() {
         if (navLogin) navLogin.style.display = 'none';
         if (navLogout) navLogout.style.display = 'block';
         if (navCommunity) navCommunity.style.display = 'block';
+        if (navProfile) navProfile.style.display = 'block';
+
+        // 관리자인 경우 관리자 메뉴 표시
+        if (navAdmin) {
+            navAdmin.style.display = user.is_admin ? 'block' : 'none';
+        }
 
         // 사용자 정보 표시 (선택적)
         if (navUser) {
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
             navUser.style.display = 'block';
-            navUser.querySelector('span').textContent = user.display_name || user.username;
+            const userSpan = navUser.querySelector('span');
+            if (userSpan) {
+                userSpan.textContent = user.display_name || user.username;
+            }
         }
     } else {
         // 로그아웃 상태
         if (navLogin) navLogin.style.display = 'block';
         if (navLogout) navLogout.style.display = 'none';
         if (navCommunity) navCommunity.style.display = 'none';
+        if (navProfile) navProfile.style.display = 'none';
+        if (navAdmin) navAdmin.style.display = 'none';
         if (navUser) navUser.style.display = 'none';
     }
 
@@ -57,7 +71,10 @@ function setActiveNavItem() {
         if (href === currentPage ||
             (currentPage === 'index.html' && href === 'index.html') ||
             (currentPage.startsWith('game') && href === 'games.html') ||
-            (currentPage.startsWith('community') && href === 'community.html')) {
+            (currentPage.startsWith('version') && href === 'games.html') ||
+            (currentPage.startsWith('community') && href === 'community.html') ||
+            (currentPage === 'profile.html' && href === 'profile.html') ||
+            (currentPage.startsWith('admin') && href === 'admin.html')) {
             link.classList.add('active');
         }
     });

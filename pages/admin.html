@@ -301,7 +301,11 @@
                         <li><a href="index.html">홈</a></li>
                         <li><a href="calendar.html">캘린더</a></li>
                         <li><a href="games.html">게임 목록</a></li>
-                        <li><a href="javascript:logout()" id="nav-user">로그아웃</a></li>
+                        <li id="nav-community"><a href="community.html">커뮤니티</a></li>
+                        <li id="nav-admin" style="display:none;"><a href="admin.html">관리자</a></li>
+                        <li id="nav-profile" style="display:none;"><a href="profile.html">프로필</a></li>
+                        <li id="nav-login"><a href="login.html">로그인</a></li>
+                        <li id="nav-logout" style="display:none;"><a href="#" onclick="handleLogout(event)">로그아웃</a></li>
                     </ul>
                 </nav>
             </div>
@@ -411,6 +415,7 @@
     </div>
 
     <script src="../js/api.js"></script>
+    <script src="../js/navigation.js"></script>
     <script src="../js/upload.js"></script>
     <script>
         let versions = [];
@@ -437,13 +442,6 @@
                 window.location.href = 'index.html';
                 return;
             }
-
-            document.getElementById('nav-user').textContent = user.display_name;
-        }
-
-        // 로그아웃
-        async function logout() {
-            await API.user.logout();
         }
 
         // 버전 목록 로드
