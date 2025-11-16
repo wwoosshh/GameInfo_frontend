@@ -10,6 +10,24 @@ const API = {
         : 'https://gameinfobackend-production.up.railway.app/api',
 
     /**
+     * 공통 헤더 생성
+     *
+     * @returns {object} HTTP 헤더
+     */
+    getHeaders() {
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+
+        const token = localStorage.getItem('authToken');
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        return headers;
+    },
+
+    /**
      * HTTP 요청 헬퍼
      *
      * @param {string} endpoint - API 엔드포인트

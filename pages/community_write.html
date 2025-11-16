@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>글쓰기 - GameInfo</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <style>
+        /* 글쓰기 폼 스타일 */
+        .write-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .write-header {
+            border-bottom: 2px solid var(--divider);
+            padding-bottom: 24px;
+            margin-bottom: 32px;
+        }
+
+        .write-header h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--divider);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .form-group textarea {
+            min-height: 400px;
+            resize: vertical;
+            font-family: inherit;
+            line-height: 1.6;
+        }
+
+        .form-group .help-text {
+            margin-top: 6px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            padding-top: 24px;
+            border-top: 1px solid var(--divider);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: 1px solid var(--divider);
+            border-radius: 6px;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .btn.primary {
+            background: var(--accent-blue);
+            color: var(--bg-primary);
+            border-color: var(--accent-blue);
+        }
+
+        .btn.primary:hover {
+            background: #3b82f6;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            background: rgba(248, 113, 113, 0.2);
+            color: var(--accent-red);
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            border-left: 3px solid var(--accent-red);
+            font-size: 14px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="main-header">
+        <div class="container">
+            <div class="header-content">
+                <h1 class="site-title">
+                    <a href="index.html">GameInfo</a>
+                </h1>
+                <nav class="main-nav">
+                    <ul id="main-nav-list">
+                        <li><a href="index.html">홈</a></li>
+                        <li><a href="calendar.html">캘린더</a></li>
+                        <li><a href="games.html">게임 목록</a></li>
+                        <li id="nav-community"><a href="community.html" class="active">커뮤니티</a></li>
+                        <li id="nav-login"><a href="login.html">로그인</a></li>
+                        <li id="nav-logout" style="display:none;"><a href="#" onclick="handleLogout(event)">로그아웃</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="main-content">
+        <div class="container">
+            <div class="write-container">
+                <!-- 헤더 -->
+                <div class="write-header">
+                    <h2 id="page-title">새 글 작성</h2>
+                </div>
+
+                <!-- 에러 메시지 -->
+                <div id="error-message" class="error-message"></div>
+
+                <!-- 로딩 중 -->
+                <div id="loading" class="loading" style="display:none;">로딩 중...</div>
+
+                <!-- 글쓰기 폼 -->
+                <form id="post-form" style="display:none;">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="category">카테고리</label>
+                            <select id="category" required>
+                                <option value="">카테고리 선택</option>
+                                <option value="discussion">자유</option>
+                                <option value="guide">가이드</option>
+                                <option value="news">소식</option>
+                                <option value="question">질문</option>
+                                <option value="humor">유머</option>
+                                <option value="fanart">팬아트</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="game-id">게임 (선택)</label>
+                            <select id="game-id">
+                                <option value="">게임 선택</option>
+                                <!-- JavaScript로 동적 로드 -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="title">제목</label>
+                        <input type="text" id="title" required placeholder="제목을 입력하세요" maxlength="200">
+                        <div class="help-text">최대 200자</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="content">내용</label>
+                        <textarea id="content" required placeholder="내용을 입력하세요"></textarea>
+                        <div class="help-text">최대 50,000자</div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn" onclick="goBack()">취소</button>
+                        <button type="submit" class="btn primary" id="submit-btn">작성</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- 푸터 -->
+    <footer class="main-footer">
+        <div class="container">
+            <p>&copy; 2025 GameInfo. 대학교 과제 프로젝트</p>
+            <p>모든 게임 관련 상표는 해당 소유자의 자산입니다.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="../js/api.js"></script>
+    <script src="../js/navigation.js"></script>
+    <script>
+        let isEditMode = false;
+        let editPostId = null;
+        const urlParams = new URLSearchParams(window.location.search);
+        const postId = urlParams.get('id');
+
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', async () => {
+            // 로그인 확인
+            if (!requireLogin()) {
+                return;
+            }
+
+            // 게임 목록 로드
+            await loadGames();
+
+            // 수정 모드 확인
+            if (postId) {
+                isEditMode = true;
+                editPostId = postId;
+                document.getElementById('page-title').textContent = '글 수정';
+                document.getElementById('submit-btn').textContent = '수정';
+                await loadPost();
+            } else {
+                document.getElementById('post-form').style.display = 'block';
+            }
+
+            // 폼 제출 이벤트
+            document.getElementById('post-form').addEventListener('submit', handleSubmit);
+        });
+
+        // 게임 목록 로드
+        async function loadGames() {
+            try {
+                const response = await API.games.getAll({ page: 1, limit: 100 });
+                if (response.success && response.data) {
+                    const gameSelect = document.getElementById('game-id');
+                    const games = response.data.games || [];
+
+                    games.forEach(game => {
+                        const option = document.createElement('option');
+                        option.value = game.game_id;
+                        option.textContent = game.game_name;
+                        gameSelect.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Failed to load games:', error);
+            }
+        }
+
+        // 게시글 로드 (수정 모드)
+        async function loadPost() {
+            const loading = document.getElementById('loading');
+            loading.style.display = 'block';
+
+            try {
+                const response = await fetch(`${API.baseURL}/posts/${editPostId}`, {
+                    headers: API.getHeaders()
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.data) {
+                    const post = data.data;
+
+                    // 권한 확인
+                    const user = JSON.parse(localStorage.getItem('user') || '{}');
+                    if (post.user_id !== user.user_id && !user.is_admin) {
+                        alert('게시글을 수정할 권한이 없습니다.');
+                        window.location.href = 'community.html';
+                        return;
+                    }
+
+                    // 폼 채우기
+                    document.getElementById('category').value = post.category || '';
+                    document.getElementById('game-id').value = post.game_id || '';
+                    document.getElementById('title').value = post.title || '';
+                    document.getElementById('content').value = post.content || '';
+
+                    loading.style.display = 'none';
+                    document.getElementById('post-form').style.display = 'block';
+                } else {
+                    alert('게시글을 불러올 수 없습니다.');
+                    window.location.href = 'community.html';
+                }
+            } catch (error) {
+                console.error('Failed to load post:', error);
+                alert('게시글을 불러오는 중 오류가 발생했습니다.');
+                window.location.href = 'community.html';
+            }
+        }
+
+        // 폼 제출 처리
+        async function handleSubmit(e) {
+            e.preventDefault();
+
+            const errorEl = document.getElementById('error-message');
+            const submitBtn = document.getElementById('submit-btn');
+
+            // 입력값 가져오기
+            const category = document.getElementById('category').value.trim();
+            const gameId = document.getElementById('game-id').value;
+            const title = document.getElementById('title').value.trim();
+            const content = document.getElementById('content').value.trim();
+
+            // 유효성 검증
+            if (!category) {
+                errorEl.textContent = '카테고리를 선택하세요.';
+                errorEl.classList.add('show');
+                return;
+            }
+
+            if (!title) {
+                errorEl.textContent = '제목을 입력하세요.';
+                errorEl.classList.add('show');
+                return;
+            }
+
+            if (!content) {
+                errorEl.textContent = '내용을 입력하세요.';
+                errorEl.classList.add('show');
+                return;
+            }
+
+            if (content.length > 50000) {
+                errorEl.textContent = '내용이 너무 깁니다. (최대 50,000자)';
+                errorEl.classList.add('show');
+                return;
+            }
+
+            errorEl.classList.remove('show');
+
+            // 버튼 비활성화
+            submitBtn.disabled = true;
+            submitBtn.textContent = isEditMode ? '수정 중...' : '작성 중...';
+
+            try {
+                const postData = {
+                    category: category,
+                    title: title,
+                    content: content
+                };
+
+                if (gameId) {
+                    postData.game_id = parseInt(gameId);
+                }
+
+                let response;
+
+                if (isEditMode) {
+                    // 수정
+                    response = await fetch(`${API.baseURL}/posts/${editPostId}`, {
+                        method: 'PUT',
+                        headers: API.getHeaders(),
+                        body: JSON.stringify(postData)
+                    });
+                } else {
+                    // 생성
+                    response = await fetch(`${API.baseURL}/posts`, {
+                        method: 'POST',
+                        headers: API.getHeaders(),
+                        body: JSON.stringify(postData)
+                    });
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const resultPostId = isEditMode ? editPostId : data.data.post_id;
+                    alert(isEditMode ? '게시글이 수정되었습니다.' : '게시글이 작성되었습니다.');
+                    window.location.href = `community_post.html?id=${resultPostId}`;
+                } else {
+                    throw new Error(data.error?.message || '작업 실패');
+                }
+            } catch (error) {
+                console.error('Failed to submit post:', error);
+                errorEl.textContent = error.message || '게시글 작성 중 오류가 발생했습니다.';
+                errorEl.classList.add('show');
+
+                submitBtn.disabled = false;
+                submitBtn.textContent = isEditMode ? '수정' : '작성';
+            }
+        }
+
+        // 목록으로
+        function goBack() {
+            if (confirm('작성을 취소하시겠습니까?')) {
+                window.location.href = 'community.html';
+            }
+        }
+    </script>
+</body>
+</html>
