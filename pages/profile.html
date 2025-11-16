@@ -494,13 +494,14 @@
                         document.getElementById('profile-bio').textContent = '자기소개가 없습니다.';
                     }
 
-                    // 배지
+                    // 배지 (localStorage의 user 정보 사용)
                     const badgesEl = document.getElementById('profile-badges');
-                    if (profile.is_admin) {
+                    const localUser = JSON.parse(localStorage.getItem('user') || '{}');
+                    if (localUser.is_admin) {
                         badgesEl.innerHTML += '<span class="badge admin">관리자</span>';
                     }
-                    if (profile.email_verified) {
-                        badgesEl.innerHTML += '<span class="badge verified">인증됨</span>';
+                    if (profile.is_active) {
+                        badgesEl.innerHTML += '<span class="badge verified">활성 계정</span>';
                     }
 
                     // 통계
