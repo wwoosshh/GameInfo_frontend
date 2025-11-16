@@ -5,7 +5,9 @@
  */
 
 const API = {
-    baseURL: 'http://localhost:8080/api',
+    baseURL: window.location.hostname === 'localhost'
+        ? 'http://localhost:8080/api'
+        : 'https://gameinfobackend-production.up.railway.app/api',
 
     /**
      * HTTP 요청 헬퍼
