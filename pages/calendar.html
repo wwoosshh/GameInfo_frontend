@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="게임 업데이트 일정을 캘린더로 확인하세요">
+    <title>업데이트 캘린더 - GameInfo</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <style>
+        /* 캘린더 헤더 */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--divider);
+        }
+
+        .month-navigation {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .month-display {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+            min-width: 150px;
+            text-align: center;
+        }
+
+        .nav-button {
+            padding: 8px 16px;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .nav-button:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border-color: var(--accent-blue);
+        }
+
+        .today-button {
+            padding: 8px 16px;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .today-button:hover {
+            background: var(--bg-hover);
+            color: var(--accent-blue);
+        }
+
+        /* 캘린더 그리드 */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background: var(--divider);
+            border: 1px solid var(--divider);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .calendar-day-header {
+            background: var(--bg-secondary);
+            padding: 12px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .calendar-day {
+            background: var(--bg-primary);
+            min-height: 100px;
+            padding: 12px;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .calendar-day:hover {
+            background: var(--bg-hover);
+        }
+
+        .calendar-day.other-month {
+            opacity: 0.3;
+        }
+
+        .calendar-day.today {
+            background: rgba(96, 165, 250, 0.05);
+            border: 1px solid var(--accent-blue);
+        }
+
+        .day-number {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .calendar-day.today .day-number {
+            color: var(--accent-blue);
+            font-weight: 700;
+        }
+
+        .day-events {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .event-dot {
+            width: 100%;
+            padding: 4px 6px;
+            background: rgba(96, 165, 250, 0.2);
+            border-left: 2px solid var(--accent-blue);
+            border-radius: 2px;
+            font-size: 11px;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .event-dot:hover {
+            background: rgba(96, 165, 250, 0.3);
+        }
+
+        /* 이벤트 리스트 (캘린더 하단) */
+        .events-list-section {
+            margin-top: 48px;
+        }
+
+        .events-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .event-item {
+            padding: 20px 0;
+            border-bottom: 1px solid var(--divider);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .event-item:hover {
+            background-color: var(--bg-hover);
+            padding-left: 16px;
+            padding-right: 16px;
+            margin-left: -16px;
+            margin-right: -16px;
+            border-radius: 8px;
+            border-bottom-color: transparent;
+        }
+
+        .event-item:last-child {
+            border-bottom: none;
+        }
+
+        .event-date-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 500;
+        }
+
+        .event-title {
+            font-size: 17px;
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-bottom: 6px;
+            letter-spacing: -0.01em;
+        }
+
+        .event-game {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 768px) {
+            .calendar-grid {
+                gap: 0;
+            }
+
+            .calendar-day {
+                min-height: 80px;
+                padding: 8px;
+            }
+
+            .calendar-day-header {
+                padding: 8px;
+                font-size: 11px;
+            }
+
+            .day-number {
+                font-size: 12px;
+            }
+
+            .event-dot {
+                font-size: 10px;
+                padding: 2px 4px;
+            }
+
+            .month-navigation {
+                gap: 12px;
+            }
+
+            .month-display {
+                font-size: 18px;
+                min-width: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="main-header">
+        <div class="container">
+            <div class="header-content">
+                <h1 class="site-title">
+                    <a href="index.html">GameInfo</a>
+                </h1>
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="index.html">홈</a></li>
+                        <li><a href="calendar.html" class="active">캘린더</a></li>
+                        <li><a href="games.html">게임 목록</a></li>
+                        <li><a href="login.html" id="nav-login">로그인</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="main-content">
+        <div class="container">
+            <!-- 페이지 헤더 -->
+            <section class="welcome-section">
+                <h2>업데이트 캘린더</h2>
+                <p>게임 버전 업데이트 일정을 한눈에 확인하세요</p>
+            </section>
+
+            <!-- 캘린더 헤더 -->
+            <div class="calendar-header">
+                <div class="month-navigation">
+                    <button class="nav-button" id="btn-prev-month">← 이전</button>
+                    <div class="month-display" id="current-month">2025년 11월</div>
+                    <button class="nav-button" id="btn-next-month">다음 →</button>
+                </div>
+                <button class="today-button" id="btn-today">오늘</button>
+            </div>
+
+            <!-- 캘린더 그리드 -->
+            <div class="calendar-grid" id="calendar-grid">
+                <!-- 요일 헤더 -->
+                <div class="calendar-day-header">일</div>
+                <div class="calendar-day-header">월</div>
+                <div class="calendar-day-header">화</div>
+                <div class="calendar-day-header">수</div>
+                <div class="calendar-day-header">목</div>
+                <div class="calendar-day-header">금</div>
+                <div class="calendar-day-header">토</div>
+                <!-- 날짜 셀은 JavaScript로 생성 -->
+            </div>
+
+            <!-- 이번 달 이벤트 리스트 -->
+            <section class="events-list-section">
+                <div class="section-header">
+                    <h3 id="events-month-title">이번 달 예정된 업데이트</h3>
+                </div>
+                <div id="events-list" class="events-list">
+                    <div class="loading">이벤트를 불러오는 중...</div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- 푸터 -->
+    <footer class="main-footer">
+        <div class="container">
+            <p>&copy; 2025 GameInfo. 대학교 과제 프로젝트</p>
+            <p>모든 게임 관련 상표는 해당 소유자의 자산입니다.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="../js/api.js"></script>
+    <script>
+        let currentYear = new Date().getFullYear();
+        let currentMonth = new Date().getMonth(); // 0-11
+        let events = [];
+
+        // 페이지 로드 시
+        document.addEventListener('DOMContentLoaded', () => {
+            checkLoginStatus();
+            renderCalendar();
+            loadEvents();
+
+            // 이벤트 리스너
+            document.getElementById('btn-prev-month').addEventListener('click', () => changeMonth(-1));
+            document.getElementById('btn-next-month').addEventListener('click', () => changeMonth(1));
+            document.getElementById('btn-today').addEventListener('click', goToToday);
+        });
+
+        // 로그인 상태 확인
+        function checkLoginStatus() {
+            const token = localStorage.getItem('authToken');
+            const navLogin = document.getElementById('nav-login');
+
+            if (token) {
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                navLogin.textContent = user.username || '내 정보';
+                navLogin.href = user.is_admin ? 'admin.html' : 'index.html';
+            }
+        }
+
+        // 이벤트 로드
+        async function loadEvents() {
+            const eventsList = document.getElementById('events-list');
+
+            try {
+                // 먼저 게임 목록을 가져옴
+                const gamesResponse = await API.games.getAll({ limit: 100 });
+
+                if (!gamesResponse.success || !gamesResponse.data.games) {
+                    eventsList.innerHTML = '<div class="empty-state"><h3>이벤트를 불러올 수 없습니다.</h3></div>';
+                    return;
+                }
+
+                events = [];
+
+                // 각 게임의 모든 버전을 가져옴
+                for (const game of gamesResponse.data.games) {
+                    try {
+                        const versionsResponse = await API.versions.getByGame(game.game_id);
+
+                        if (versionsResponse.success && versionsResponse.data.versions) {
+                            // 모든 버전을 이벤트로 변환
+                            const gameVersionEvents = versionsResponse.data.versions
+                                .filter(v => v.release_date) // 날짜가 있는 것만
+                                .map(v => ({
+                                    date: v.release_date,
+                                    title: `버전 ${v.version_number}${v.version_name ? ': ' + v.version_name : ''}`,
+                                    game: game.game_name,
+                                    gameId: game.game_id,
+                                    versionId: v.version_id,
+                                    isCurrent: v.is_current
+                                }));
+
+                            events.push(...gameVersionEvents);
+                        }
+                    } catch (versionError) {
+                        console.log(`No versions for game ${game.game_id}`);
+                    }
+                }
+
+                // 날짜순 정렬
+                events.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                renderCalendar();
+                displayEventsList();
+            } catch (error) {
+                console.error('Failed to load events:', error);
+                eventsList.innerHTML = '<div class="empty-state"><h3>이벤트를 불러오는데 실패했습니다.</h3></div>';
+            }
+        }
+
+        // 캘린더 렌더링
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            const monthDisplay = document.getElementById('current-month');
+
+            // 월 표시 업데이트
+            monthDisplay.textContent = `${currentYear}년 ${currentMonth + 1}월`;
+
+            // 기존 날짜 셀 제거 (헤더는 유지)
+            const dayCells = grid.querySelectorAll('.calendar-day');
+            dayCells.forEach(cell => cell.remove());
+
+            // 해당 월의 첫 날과 마지막 날
+            const firstDay = new Date(currentYear, currentMonth, 1);
+            const lastDay = new Date(currentYear, currentMonth + 1, 0);
+
+            // 캘린더 시작일 (이전 달 날짜 포함)
+            const startDay = new Date(firstDay);
+            startDay.setDate(startDay.getDate() - firstDay.getDay());
+
+            // 캘린더 종료일 (다음 달 날짜 포함)
+            const endDay = new Date(lastDay);
+            endDay.setDate(endDay.getDate() + (6 - lastDay.getDay()));
+
+            // 오늘 날짜
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            // 날짜 셀 생성
+            const current = new Date(startDay);
+            while (current <= endDay) {
+                const dayCell = createDayCell(current, today);
+                grid.appendChild(dayCell);
+
+                current.setDate(current.getDate() + 1);
+            }
+        }
+
+        // 날짜 셀 생성
+        function createDayCell(date, today) {
+            const cell = document.createElement('div');
+            cell.className = 'calendar-day';
+
+            // 다른 달 날짜 표시
+            if (date.getMonth() !== currentMonth) {
+                cell.classList.add('other-month');
+            }
+
+            // 오늘 날짜 표시
+            if (date.getTime() === today.getTime()) {
+                cell.classList.add('today');
+            }
+
+            // 날짜 숫자
+            const dayNumber = document.createElement('div');
+            dayNumber.className = 'day-number';
+            dayNumber.textContent = date.getDate();
+            cell.appendChild(dayNumber);
+
+            // 이벤트 표시
+            const dayEvents = document.createElement('div');
+            dayEvents.className = 'day-events';
+
+            const dateStr = formatDate(date);
+            const dayEventList = events.filter(event => event.date === dateStr);
+
+            dayEventList.slice(0, 3).forEach(event => {
+                const eventDot = document.createElement('div');
+                eventDot.className = 'event-dot';
+                eventDot.textContent = event.game;
+                eventDot.title = `${event.game} - ${event.title}`;
+                eventDot.onclick = () => goToVersion(event.versionId);
+                dayEvents.appendChild(eventDot);
+            });
+
+            if (dayEventList.length > 3) {
+                const moreDot = document.createElement('div');
+                moreDot.className = 'event-dot';
+                moreDot.textContent = `+${dayEventList.length - 3}`;
+                moreDot.style.background = 'transparent';
+                moreDot.style.borderLeft = 'none';
+                moreDot.style.color = 'var(--text-muted)';
+                dayEvents.appendChild(moreDot);
+            }
+
+            cell.appendChild(dayEvents);
+            return cell;
+        }
+
+        // 이벤트 리스트 표시
+        function displayEventsList() {
+            const eventsList = document.getElementById('events-list');
+            const eventsTitle = document.getElementById('events-month-title');
+
+            eventsTitle.textContent = `${currentYear}년 ${currentMonth + 1}월 예정된 업데이트`;
+
+            // 현재 월의 이벤트만 필터링
+            const monthEvents = events.filter(event => {
+                const eventDate = new Date(event.date);
+                return eventDate.getFullYear() === currentYear &&
+                       eventDate.getMonth() === currentMonth;
+            });
+
+            // 날짜순 정렬
+            monthEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            if (monthEvents.length === 0) {
+                eventsList.innerHTML = '<div class="empty-state"><h3>이번 달 예정된 업데이트가 없습니다.</h3></div>';
+                return;
+            }
+
+            eventsList.innerHTML = monthEvents.map(event => {
+                const eventDate = new Date(event.date);
+                const dateLabel = `${eventDate.getMonth() + 1}월 ${eventDate.getDate()}일`;
+
+                return `
+                    <div class="event-item" onclick="goToVersion(${event.versionId})">
+                        <div class="event-date-label">${dateLabel}</div>
+                        <div class="event-title">${escapeHtml(event.title)}</div>
+                        <div class="event-game">${escapeHtml(event.game)}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 월 변경
+        function changeMonth(delta) {
+            currentMonth += delta;
+
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            } else if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+
+            renderCalendar();
+            displayEventsList();
+        }
+
+        // 오늘로 이동
+        function goToToday() {
+            const today = new Date();
+            currentYear = today.getFullYear();
+            currentMonth = today.getMonth();
+
+            renderCalendar();
+            displayEventsList();
+        }
+
+        // 버전 페이지로 이동
+        function goToVersion(versionId) {
+            window.location.href = `version_detail.html?version_id=${versionId}`;
+        }
+
+        // 날짜 포맷 (YYYY-MM-DD)
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // HTML 이스케이프
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

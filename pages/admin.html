@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 페이지 - 붕괴: 스타레일</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <style>
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 48px 24px;
+        }
+
+        .admin-header {
+            padding: 48px 0;
+            margin-bottom: 32px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #e6e6e6;
+            letter-spacing: -0.03em;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: #60a5fa;
+            color: #0a0e14;
+        }
+
+        .btn-primary:hover {
+            background: #3b82f6;
+        }
+
+        .btn-success {
+            background: #34d399;
+            color: #0a0e14;
+        }
+
+        .btn-success:hover {
+            background: #10b981;
+        }
+
+        .btn-danger {
+            background: #f87171;
+            color: #0a0e14;
+        }
+
+        .btn-danger:hover {
+            background: #ef4444;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: #e6e6e6;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .versions-table {
+            margin-bottom: 48px;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .table-header h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #e6e6e6;
+            letter-spacing: -0.02em;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 20px 16px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        th {
+            background: transparent;
+            font-weight: 600;
+            color: #9ca3af;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            color: #e6e6e6;
+            font-size: 14px;
+        }
+
+        tr:hover td {
+            background: #1a1f26;
+        }
+
+        tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-current {
+            background: rgba(96, 165, 250, 0.2);
+            color: #60a5fa;
+        }
+
+        .badge-past {
+            background: rgba(156, 163, 175, 0.2);
+            color: #9ca3af;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.8);
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: #12171e;
+            padding: 32px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #e6e6e6;
+        }
+
+        .close {
+            font-size: 28px;
+            font-weight: bold;
+            color: #6b7280;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close:hover {
+            color: #9ca3af;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #e6e6e6;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+            background: #0a0e14;
+            color: #e6e6e6;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #60a5fa;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+        }
+
+        .checkbox-group label {
+            margin-bottom: 0;
+        }
+
+        .error-message {
+            background: rgba(248, 113, 113, 0.2);
+            color: #f87171;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            border-left: 3px solid #f87171;
+            font-size: 14px;
+        }
+
+        .success-message {
+            background: rgba(52, 211, 153, 0.2);
+            color: #34d399;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            border-left: 3px solid #34d399;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <div class="header-content">
+                <h1 class="site-title">
+                    <a href="index.html">GameInfo</a>
+                </h1>
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="index.html">홈</a></li>
+                        <li><a href="calendar.html">캘린더</a></li>
+                        <li><a href="games.html">게임 목록</a></li>
+                        <li><a href="javascript:logout()" id="nav-user">로그아웃</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="admin-container">
+        <div class="admin-header">
+            <h2 class="admin-title">버전 관리</h2>
+            <button class="btn btn-success" onclick="openCreateModal()">+ 새 버전 추가</button>
+        </div>
+
+        <div class="versions-table">
+            <div class="table-header">
+                <h3>버전 목록</h3>
+            </div>
+            <div id="versions-container">
+                <div class="loading">버전 목록 로딩 중...</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 버전 생성/수정 모달 -->
+    <div id="versionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">새 버전 추가</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div id="modalMessage"></div>
+            <form id="versionForm">
+                <input type="hidden" id="versionId">
+                <input type="hidden" id="gameId" value="2">
+
+                <div class="form-group">
+                    <label for="versionNumber">버전 번호 *</label>
+                    <input type="text" id="versionNumber" required placeholder="예: 2.7">
+                </div>
+
+                <div class="form-group">
+                    <label for="versionName">버전 이름</label>
+                    <input type="text" id="versionName" placeholder="예: 운명의 항해">
+                </div>
+
+                <div class="form-group">
+                    <label for="versionNameEn">버전 이름 (영문)</label>
+                    <input type="text" id="versionNameEn" placeholder="예: Voyage of Destiny">
+                </div>
+
+                <div class="form-group">
+                    <label for="releaseDate">출시일 *</label>
+                    <input type="date" id="releaseDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="endDate">종료일</label>
+                    <input type="date" id="endDate">
+                </div>
+
+                <div class="form-group">
+                    <label for="durationDays">지속 기간 (일)</label>
+                    <input type="number" id="durationDays" placeholder="예: 42">
+                </div>
+
+                <div class="form-group">
+                    <label for="description">설명</label>
+                    <textarea id="description" placeholder="버전 설명"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="bannerImageUrl">배너 이미지 URL</label>
+                    <div style="display: flex; gap: 8px; align-items: flex-start;">
+                        <input type="url" id="bannerImageUrl" placeholder="https://..." style="flex: 1;" onchange="updateImagePreview('bannerImageUrl')">
+                        <input type="file" id="bannerImageUrl_file" accept="image/*" style="display: none;" onchange="handleImageUpload(this, 'bannerImageUrl')">
+                        <button type="button" class="btn btn-secondary btn-small" onclick="document.getElementById('bannerImageUrl_file').click()" style="white-space: nowrap;">파일 선택</button>
+                    </div>
+                    <div id="bannerImageUrl_preview" style="margin-top: 8px; display: none;">
+                        <img src="" alt="미리보기" style="max-width: 300px; max-height: 150px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                    </div>
+                    <div id="bannerImageUrl_progress" style="margin-top: 8px; display: none; color: #60a5fa; font-size: 13px;">업로드 중...</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="thumbnailUrl">썸네일 URL</label>
+                    <div style="display: flex; gap: 8px; align-items: flex-start;">
+                        <input type="url" id="thumbnailUrl" placeholder="https://..." style="flex: 1;" onchange="updateImagePreview('thumbnailUrl')">
+                        <input type="file" id="thumbnailUrl_file" accept="image/*" style="display: none;" onchange="handleImageUpload(this, 'thumbnailUrl')">
+                        <button type="button" class="btn btn-secondary btn-small" onclick="document.getElementById('thumbnailUrl_file').click()" style="white-space: nowrap;">파일 선택</button>
+                    </div>
+                    <div id="thumbnailUrl_preview" style="margin-top: 8px; display: none;">
+                        <img src="" alt="미리보기" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                    </div>
+                    <div id="thumbnailUrl_progress" style="margin-top: 8px; display: none; color: #60a5fa; font-size: 13px;">업로드 중...</div>
+                </div>
+
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="isCurrent">
+                    <label for="isCurrent">현재 버전으로 설정</label>
+                </div>
+
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-primary">저장</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">취소</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/upload.js"></script>
+    <script>
+        let versions = [];
+        let editingVersionId = null;
+
+        // 페이지 초기화
+        async function initPage() {
+            checkAuth();
+            await loadVersions();
+        }
+
+        // 권한 확인
+        function checkAuth() {
+            const userStr = localStorage.getItem('user');
+            if (!userStr) {
+                alert('로그인이 필요합니다.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const user = JSON.parse(userStr);
+            if (!user.is_admin) {
+                alert('관리자 권한이 필요합니다.');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            document.getElementById('nav-user').textContent = user.display_name;
+        }
+
+        // 로그아웃
+        async function logout() {
+            await API.user.logout();
+        }
+
+        // 버전 목록 로드
+        async function loadVersions() {
+            try {
+                const response = await API.versions.getByGame(2);  // 붕괴: 스타레일
+                versions = response.data.versions;
+                displayVersions();
+            } catch (error) {
+                console.error('Failed to load versions:', error);
+                document.getElementById('versions-container').innerHTML =
+                    '<div class="error-message">버전 목록을 불러올 수 없습니다.</div>';
+            }
+        }
+
+        // 버전 목록 표시
+        function displayVersions() {
+            const container = document.getElementById('versions-container');
+
+            if (!versions || versions.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #7f8c8d;">등록된 버전이 없습니다.</p>';
+                return;
+            }
+
+            const html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>버전</th>
+                            <th>이름</th>
+                            <th>출시일</th>
+                            <th>기간</th>
+                            <th>상태</th>
+                            <th>항목 수</th>
+                            <th>관리</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${versions.map(v => `
+                            <tr>
+                                <td><strong>${escapeHtml(v.version_number)}</strong></td>
+                                <td>${escapeHtml(v.version_name || '-')}</td>
+                                <td>${formatDate(v.release_date)}</td>
+                                <td>${v.duration_days ? v.duration_days + '일' : '-'}</td>
+                                <td>
+                                    ${v.is_current == 1
+                                        ? '<span class="badge badge-current">현재</span>'
+                                        : '<span class="badge badge-past">종료</span>'}
+                                </td>
+                                <td>${v.total_items || 0}개</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn btn-primary btn-small" onclick="goToVersionDetail(${v.version_id})">상세</button>
+                                        <button class="btn btn-primary btn-small" onclick="openEditModal(${v.version_id})">수정</button>
+                                        <button class="btn btn-success btn-small" onclick="goToManageItems(${v.version_id})">항목</button>
+                                        <button class="btn btn-danger btn-small" onclick="deleteVersion(${v.version_id})">삭제</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        // 버전 생성 모달 열기
+        function openCreateModal() {
+            editingVersionId = null;
+            document.getElementById('modalTitle').textContent = '새 버전 추가';
+            document.getElementById('versionForm').reset();
+            document.getElementById('versionId').value = '';
+            document.getElementById('modalMessage').innerHTML = '';
+            document.getElementById('versionModal').classList.add('active');
+        }
+
+        // 버전 수정 모달 열기
+        async function openEditModal(versionId) {
+            editingVersionId = versionId;
+            document.getElementById('modalTitle').textContent = '버전 수정';
+            document.getElementById('modalMessage').innerHTML = '';
+
+            try {
+                const response = await API.versions.getById(versionId);
+                const version = response.data;
+
+                document.getElementById('versionId').value = version.version_id;
+                document.getElementById('versionNumber').value = version.version_number;
+                document.getElementById('versionName').value = version.version_name || '';
+                document.getElementById('versionNameEn').value = version.version_name_en || '';
+                document.getElementById('releaseDate').value = version.release_date;
+                document.getElementById('endDate').value = version.end_date || '';
+                document.getElementById('durationDays').value = version.duration_days || '';
+                document.getElementById('description').value = version.description || '';
+                document.getElementById('bannerImageUrl').value = version.banner_image_url || '';
+                document.getElementById('thumbnailUrl').value = version.thumbnail_url || '';
+                document.getElementById('isCurrent').checked = version.is_current == 1;
+
+                // 이미지 미리보기 업데이트
+                if (version.banner_image_url) updateImagePreview('bannerImageUrl');
+                if (version.thumbnail_url) updateImagePreview('thumbnailUrl');
+
+                document.getElementById('versionModal').classList.add('active');
+            } catch (error) {
+                alert('버전 정보를 불러올 수 없습니다.');
+            }
+        }
+
+        // 모달 닫기
+        function closeModal() {
+            document.getElementById('versionModal').classList.remove('active');
+        }
+
+        // 버전 폼 제출
+        document.getElementById('versionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const versionData = {
+                game_id: 2,  // 붕괴: 스타레일
+                version_number: document.getElementById('versionNumber').value,
+                version_name: document.getElementById('versionName').value,
+                version_name_en: document.getElementById('versionNameEn').value,
+                release_date: document.getElementById('releaseDate').value,
+                end_date: document.getElementById('endDate').value || null,
+                duration_days: document.getElementById('durationDays').value || null,
+                description: document.getElementById('description').value,
+                banner_image_url: document.getElementById('bannerImageUrl').value || null,
+                thumbnail_url: document.getElementById('thumbnailUrl').value || null,
+                is_current: document.getElementById('isCurrent').checked ? 1 : 0
+            };
+
+            try {
+                if (editingVersionId) {
+                    // 수정
+                    await API.versions.update(editingVersionId, versionData);
+                    showMessage('success', '버전이 수정되었습니다.');
+                } else {
+                    // 생성
+                    await API.versions.create(versionData);
+                    showMessage('success', '버전이 생성되었습니다.');
+                }
+
+                setTimeout(() => {
+                    closeModal();
+                    loadVersions();
+                }, 1500);
+            } catch (error) {
+                showMessage('error', '저장에 실패했습니다: ' + error.message);
+            }
+        });
+
+        // 버전 삭제
+        async function deleteVersion(versionId) {
+            if (!confirm('정말 이 버전을 삭제하시겠습니까? 모든 업데이트 항목도 함께 삭제됩니다.')) {
+                return;
+            }
+
+            try {
+                await API.versions.delete(versionId);
+                alert('버전이 삭제되었습니다.');
+                loadVersions();
+            } catch (error) {
+                alert('삭제에 실패했습니다: ' + error.message);
+            }
+        }
+
+        // 버전 상세로 이동
+        function goToVersionDetail(versionId) {
+            window.location.href = `version_detail.html?version_id=${versionId}`;
+        }
+
+        // 항목 관리로 이동
+        function goToManageItems(versionId) {
+            window.location.href = `admin_items_v2.html?version_id=${versionId}`;
+        }
+
+        // 메시지 표시
+        function showMessage(type, message) {
+            const messageDiv = document.getElementById('modalMessage');
+            messageDiv.className = type === 'success' ? 'success-message' : 'error-message';
+            messageDiv.textContent = message;
+        }
+
+        // 유틸리티 함수
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.toString().replace(/[&<>"']/g, m => map[m]);
+        }
+
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', initPage);
+
+        // 모달 외부 클릭 시 닫기
+        window.onclick = function(event) {
+            const modal = document.getElementById('versionModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>

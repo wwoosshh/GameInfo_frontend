@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>버전 목록 - GameInfo</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <style>
+        /* 버전 리스트 - 미니멀 스타일 */
+        .version-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            margin-top: 32px;
+        }
+
+        .version-card {
+            display: flex;
+            align-items: center;
+            padding: 24px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .version-card:hover {
+            background-color: #1a1f26;
+            padding-left: 16px;
+            padding-right: 16px;
+            margin-left: -16px;
+            margin-right: -16px;
+            border-radius: 8px;
+            border-bottom-color: transparent;
+        }
+
+        .version-card:last-child {
+            border-bottom: none;
+        }
+
+        .version-card.current-version {
+            border-left: 3px solid #60a5fa;
+            padding-left: 16px;
+        }
+
+        .version-thumbnail {
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #12171e, #1a1f26);
+            flex-shrink: 0;
+            margin-right: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .version-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .version-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #60a5fa;
+            color: #0a0e14;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .version-content {
+            flex: 1;
+        }
+
+        .version-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .version-number {
+            font-size: 20px;
+            font-weight: 700;
+            color: #e6e6e6;
+            letter-spacing: -0.02em;
+        }
+
+        .version-name {
+            font-size: 15px;
+            color: #9ca3af;
+            margin-top: 4px;
+        }
+
+        .version-date {
+            text-align: right;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .version-stats {
+            display: flex;
+            gap: 20px;
+            margin-top: 12px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stat-icon {
+            font-size: 16px;
+            color: #6b7280;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: #e6e6e6;
+            font-size: 14px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        .game-header {
+            padding: 48px 0;
+            margin-bottom: 32px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .game-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #e6e6e6;
+            letter-spacing: -0.03em;
+        }
+
+        .game-subtitle {
+            color: #9ca3af;
+            font-size: 16px;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .filter-button {
+            padding: 8px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: transparent;
+            color: #9ca3af;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .filter-button:hover {
+            background: #1a1f26;
+            color: #e6e6e6;
+        }
+
+        .filter-button.active {
+            background: #60a5fa;
+            color: #0a0e14;
+            border-color: #60a5fa;
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <div class="header-content">
+                <h1 class="site-title">
+                    <a href="index.html">GameInfo</a>
+                </h1>
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="index.html">홈</a></li>
+                        <li><a href="calendar.html">캘린더</a></li>
+                        <li><a href="games.html" class="active">게임 목록</a></li>
+                        <li><a href="login.html" id="nav-login">로그인</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <!-- 게임 정보 헤더 -->
+            <div class="game-header" id="game-header">
+                <div class="loading">게임 정보 로딩 중...</div>
+            </div>
+
+            <!-- 필터 바 -->
+            <div class="filter-bar">
+                <button class="filter-button active" data-filter="all">전체</button>
+                <button class="filter-button" data-filter="current">현재 버전</button>
+                <button class="filter-button" data-filter="recent">최근 3개월</button>
+            </div>
+
+            <!-- 버전 목록 -->
+            <div class="version-list" id="version-list">
+                <div class="loading">버전 목록 로딩 중...</div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <p>&copy; 2025 GameInfo. 대학교 과제 프로젝트</p>
+            <p>모든 게임 관련 상표는 해당 소유자의 자산입니다.</p>
+        </div>
+    </footer>
+
+    <script src="../js/api.js"></script>
+    <script>
+        // URL에서 game_id 가져오기
+        const urlParams = new URLSearchParams(window.location.search);
+        const gameId = urlParams.get('game_id');
+
+        if (!gameId) {
+            alert('게임 ID가 필요합니다.');
+            window.location.href = 'index.html';
+        }
+
+        let allVersions = [];
+
+        // 로그인 상태 확인
+        function checkLoginStatus() {
+            const token = localStorage.getItem('authToken');
+            const navLogin = document.getElementById('nav-login');
+
+            if (token) {
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                navLogin.textContent = user.username || '내 정보';
+                navLogin.href = user.is_admin ? 'admin.html' : 'index.html';
+            }
+        }
+
+        // 페이지 초기화
+        async function initPage() {
+            checkLoginStatus();
+            await loadGameInfo();
+            await loadVersions();
+            setupFilters();
+        }
+
+        // 게임 정보 로드
+        async function loadGameInfo() {
+            try {
+                const response = await API.games.getById(gameId);
+                const game = response.data;
+
+                document.getElementById('game-header').innerHTML = `
+                    <h2 class="game-title">${escapeHtml(game.game_name)}</h2>
+                    <p class="game-subtitle">${escapeHtml(game.description || '')}</p>
+                `;
+            } catch (error) {
+                console.error('Failed to load game info:', error);
+                document.getElementById('game-header').innerHTML = '<div class="error-message">게임 정보를 불러올 수 없습니다.</div>';
+            }
+        }
+
+        // 버전 목록 로드
+        async function loadVersions() {
+            try {
+                const response = await API.versions.getByGame(gameId);
+                allVersions = response.data.versions;
+                displayVersions(allVersions);
+            } catch (error) {
+                console.error('Failed to load versions:', error);
+                document.getElementById('version-list').innerHTML = '<div class="error-message">버전 목록을 불러올 수 없습니다.</div>';
+            }
+        }
+
+        // 버전 목록 표시
+        function displayVersions(versions) {
+            const container = document.getElementById('version-list');
+
+            if (!versions || versions.length === 0) {
+                container.innerHTML = '<div class="empty-state"><h3>등록된 버전이 없습니다.</h3></div>';
+                return;
+            }
+
+            const html = versions.map(version => `
+                <div class="version-card ${version.is_current == 1 ? 'current-version' : ''}"
+                     onclick="goToVersionDetail(${version.version_id})">
+                    <div class="version-thumbnail">
+                        ${version.thumbnail_url ? `<img src="${escapeHtml(version.thumbnail_url)}" alt="${escapeHtml(version.version_number)}">` : ''}
+                        ${version.is_current == 1 ? '<div class="version-badge">현재 버전</div>' : ''}
+                    </div>
+                    <div class="version-content">
+                        <div class="version-header">
+                            <div>
+                                <div class="version-number">버전 ${escapeHtml(version.version_number)}</div>
+                                <div class="version-name">${escapeHtml(version.version_name || '')}</div>
+                            </div>
+                            <div class="version-date">
+                                <div>${formatDate(version.release_date)}</div>
+                                ${version.duration_days ? `<div style="font-size: 0.9rem;">${version.duration_days}일간</div>` : ''}
+                            </div>
+                        </div>
+                        <div class="version-stats">
+                            <div class="stat-item">
+                                <span class="stat-value">${version.new_characters || 0}</span>
+                                <span class="stat-label">신규 캐릭터</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">${version.new_events || 0}</span>
+                                <span class="stat-label">이벤트</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">${version.total_items || 0}</span>
+                                <span class="stat-label">총 항목</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = html;
+        }
+
+        // 필터 설정
+        function setupFilters() {
+            const buttons = document.querySelectorAll('.filter-button');
+            buttons.forEach(button => {
+                button.addEventListener('click', function() {
+                    buttons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+
+                    const filter = this.dataset.filter;
+                    filterVersions(filter);
+                });
+            });
+        }
+
+        // 버전 필터링
+        function filterVersions(filter) {
+            let filtered = allVersions;
+
+            if (filter === 'current') {
+                filtered = allVersions.filter(v => v.is_current == 1);
+            } else if (filter === 'recent') {
+                const threeMonthsAgo = new Date();
+                threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+                filtered = allVersions.filter(v => new Date(v.release_date) >= threeMonthsAgo);
+            }
+
+            displayVersions(filtered);
+        }
+
+        // 버전 상세 페이지로 이동
+        function goToVersionDetail(versionId) {
+            window.location.href = `version_detail.html?version_id=${versionId}`;
+        }
+
+        // 날짜 포맷
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+        }
+
+        // HTML 이스케이프
+        function escapeHtml(text) {
+            if (!text) return '';
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.toString().replace(/[&<>"']/g, m => map[m]);
+        }
+
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', initPage);
+    </script>
+</body>
+</html>

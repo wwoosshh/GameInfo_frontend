@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>업데이트 항목 관리 V2 - 붕괴: 스타레일</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <style>
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 48px 24px;
+        }
+
+        .admin-header {
+            padding: 48px 0;
+            margin-bottom: 32px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-top h2 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #e6e6e6;
+            letter-spacing: -0.03em;
+            margin-bottom: 8px;
+        }
+
+        .version-info {
+            font-size: 16px;
+            color: #9ca3af;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: #60a5fa;
+            color: #0a0e14;
+        }
+
+        .btn-primary:hover {
+            background: #3b82f6;
+        }
+
+        .btn-success {
+            background: #34d399;
+            color: #0a0e14;
+        }
+
+        .btn-success:hover {
+            background: #10b981;
+        }
+
+        .btn-danger {
+            background: #f87171;
+            color: #0a0e14;
+        }
+
+        .btn-danger:hover {
+            background: #ef4444;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: #e6e6e6;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+
+        .items-section {
+            margin-bottom: 48px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .section-header h3 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #e6e6e6;
+            letter-spacing: -0.02em;
+        }
+
+        .items-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .item-card {
+            display: flex;
+            gap: 16px;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.2s ease;
+        }
+
+        .item-card:hover {
+            background-color: #1a1f26;
+            padding-left: 16px;
+            padding-right: 16px;
+            margin-left: -16px;
+            margin-right: -16px;
+            border-radius: 8px;
+            border-bottom-color: transparent;
+        }
+
+        .item-card:last-child {
+            border-bottom: none;
+        }
+
+        .item-card.featured {
+            border-left: 3px solid #fbbf24;
+            padding-left: 16px;
+        }
+
+        .item-thumbnail {
+            flex-shrink: 0;
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #1a1f26;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .item-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .item-thumbnail-placeholder {
+            color: #4b5563;
+            font-size: 12px;
+            text-align: center;
+            padding: 8px;
+        }
+
+        .item-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .item-name {
+            font-size: 17px;
+            font-weight: 600;
+            color: #e6e6e6;
+            margin-bottom: 8px;
+            letter-spacing: -0.01em;
+        }
+
+        .item-description {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .item-meta {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-rarity {
+            background: rgba(147, 51, 234, 0.2);
+            color: #a78bfa;
+        }
+
+        .badge-element {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+        }
+
+        .badge-path {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+        }
+
+        .badge-type {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+        }
+
+        .badge-featured {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.8);
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: #12171e;
+            padding: 32px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .modal-header h3 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #e6e6e6;
+        }
+
+        .close {
+            font-size: 28px;
+            font-weight: bold;
+            color: #6b7280;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close:hover {
+            color: #9ca3af;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #e6e6e6;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+            background: #0a0e14;
+            color: #e6e6e6;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #60a5fa;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-group input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+        }
+
+        .checkbox-group label {
+            margin-bottom: 0;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .error-message {
+            background: rgba(248, 113, 113, 0.2);
+            color: #f87171;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            border-left: 3px solid #f87171;
+            font-size: 14px;
+        }
+
+        .success-message {
+            background: rgba(52, 211, 153, 0.2);
+            color: #34d399;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            border-left: 3px solid #34d399;
+            font-size: 14px;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: transparent;
+            color: #9ca3af;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s;
+            margin-bottom: 32px;
+            font-size: 14px;
+        }
+
+        .back-button:hover {
+            background: #1a1f26;
+            color: #e6e6e6;
+        }
+
+        #dynamicFields {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .field-group-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #60a5fa;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <div class="header-content">
+                <h1 class="site-title">
+                    <a href="index.html">GameInfo</a>
+                </h1>
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="index.html">홈</a></li>
+                        <li><a href="calendar.html">캘린더</a></li>
+                        <li><a href="games.html">게임 목록</a></li>
+                        <li><a href="javascript:logout()" id="nav-user">로그아웃</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="admin-container">
+        <a href="admin.html" class="back-button">← 버전 관리로</a>
+
+        <div class="admin-header">
+            <div class="header-top">
+                <div>
+                    <h2 id="versionTitle">버전 업데이트 항목 관리 V2</h2>
+                    <p class="version-info" id="versionInfo">로딩 중...</p>
+                </div>
+                <button class="btn btn-success" onclick="openCreateModal()">+ 항목 추가</button>
+            </div>
+        </div>
+
+        <div id="items-container">
+            <div class="loading">업데이트 항목 로딩 중...</div>
+        </div>
+    </main>
+
+    <!-- 항목 생성/수정 모달 -->
+    <div id="itemModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">새 항목 추가</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div id="modalMessage"></div>
+            <form id="itemForm">
+                <input type="hidden" id="itemId">
+
+                <!-- 기본 필드 -->
+                <div class="form-group">
+                    <label for="category">카테고리 *</label>
+                    <select id="category" required onchange="updateFormFields()">
+                        <option value="">선택하세요</option>
+                        <option value="new_field">신규 필드</option>
+                        <option value="new_path">신규 운명의 길</option>
+                        <option value="new_character">신규 캐릭터</option>
+                        <option value="rerun_character">복각 캐릭터</option>
+                        <option value="new_lightcone">신규 광추</option>
+                        <option value="rerun_lightcone">복각 광추</option>
+                        <option value="new_relic">신규 유물</option>
+                        <option value="new_trailblaze">신규 개척 임무</option>
+                        <option value="new_companion">신규 동행 임무</option>
+                        <option value="new_adventure">신규 모험 임무</option>
+                        <option value="new_costume">신규 코스튬</option>
+                        <option value="new_event">신규 이벤트</option>
+                        <option value="support_event">혜택 및 육성 지원</option>
+                        <option value="new_content">신규 콘텐츠</option>
+                        <option value="new_enemy">신규 적</option>
+                        <option value="new_material">신규 재료</option>
+                        <option value="convenience">편의성 업데이트</option>
+                        <option value="other">기타</option>
+                    </select>
+                </div>
+
+                <!-- 동적 필드가 여기에 생성됨 -->
+                <div id="dynamicFields"></div>
+
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="isFeatured">
+                    <label for="isFeatured">주요 콘텐츠로 표시</label>
+                </div>
+
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-primary">저장</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">취소</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/category_forms.js"></script>
+    <script src="../js/upload.js"></script>
+    <script>
+        // generateFieldHTML 함수 오버라이드 (이미지 업로드 기능 추가)
+        // 원본 함수를 저장
+        const originalGenerateFieldHTML = (function() {
+            // category_forms.js의 generateFieldHTML 로직 복사
+            return function(field) {
+                const requiredMark = field.required ? ' *' : '';
+                const fieldId = `field_${field.name}`;
+                let inputHTML = '';
+
+                switch (field.type) {
+                    case 'text':
+                        inputHTML = `
+                            <input type="text"
+                                   id="${fieldId}"
+                                   ${field.required ? 'required' : ''}
+                                   placeholder="${field.placeholder || ''}"
+                                   class="form-control">
+                        `;
+                        break;
+
+                    case 'number':
+                        inputHTML = `
+                            <input type="number"
+                                   id="${fieldId}"
+                                   ${field.required ? 'required' : ''}
+                                   placeholder="${field.placeholder || ''}"
+                                   class="form-control">
+                        `;
+                        break;
+
+                    case 'textarea':
+                        inputHTML = `
+                            <textarea id="${fieldId}"
+                                      ${field.required ? 'required' : ''}
+                                      placeholder="${field.placeholder || ''}"
+                                      rows="3"
+                                      class="form-control"></textarea>
+                        `;
+                        break;
+
+                    case 'select':
+                        inputHTML = `
+                            <select id="${fieldId}"
+                                    ${field.required ? 'required' : ''}
+                                    class="form-control">
+                                <option value="">선택하세요</option>
+                                ${field.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+                            </select>
+                        `;
+                        break;
+
+                    case 'checkbox':
+                        inputHTML = `
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="${fieldId}">
+                                <label for="${fieldId}">${field.label}</label>
+                            </div>
+                        `;
+                        return inputHTML;
+
+                    default:
+                        inputHTML = `<input type="text" id="${fieldId}" class="form-control">`;
+                }
+
+                return `
+                    <div class="form-group">
+                        <label for="${fieldId}">${field.label}${requiredMark}</label>
+                        ${inputHTML}
+                    </div>
+                `;
+            };
+        })();
+
+        function generateFieldHTML(field) {
+            const requiredMark = field.required ? ' *' : '';
+            const fieldId = `field_${field.name}`;
+
+            // image_url 필드인 경우 파일 업로드 UI 추가
+            if (field.type === 'text' && field.name === 'image_url') {
+                const inputHTML = `
+                    <div style="display: flex; gap: 8px; align-items: flex-start;">
+                        <input type="text"
+                               id="${fieldId}"
+                               ${field.required ? 'required' : ''}
+                               placeholder="${field.placeholder || ''}"
+                               style="flex: 1;"
+                               onchange="updateImagePreview('${fieldId}')"
+                               class="form-control">
+                        <input type="file"
+                               id="${fieldId}_file"
+                               accept="image/*"
+                               style="display: none;"
+                               onchange="handleImageUpload(this, '${fieldId}')">
+                        <button type="button"
+                                class="btn btn-secondary btn-small"
+                                onclick="document.getElementById('${fieldId}_file').click()"
+                                style="white-space: nowrap;">
+                            파일 선택
+                        </button>
+                    </div>
+                    <div id="${fieldId}_preview" style="margin-top: 8px; display: none;">
+                        <img src="" alt="미리보기" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                    </div>
+                    <div id="${fieldId}_progress" style="margin-top: 8px; display: none; color: #60a5fa; font-size: 13px;">
+                        업로드 중...
+                    </div>
+                `;
+                return `
+                    <div class="form-group">
+                        <label for="${fieldId}">${field.label}${requiredMark}</label>
+                        ${inputHTML}
+                    </div>
+                `;
+            }
+
+            // 다른 필드는 원래 함수 사용
+            return originalGenerateFieldHTML(field);
+        }
+
+        // 전역으로 노출
+        window.generateFieldHTML = generateFieldHTML;
+    </script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const versionId = urlParams.get('version_id');
+
+        if (!versionId) {
+            alert('버전 ID가 필요합니다.');
+            window.location.href = 'admin.html';
+        }
+
+        let versionData = null;
+        let itemsData = null;
+        let editingItemId = null;
+
+        const categoryNames = {
+            'new_field': '신규 필드',
+            'new_path': '신규 운명의 길',
+            'new_character': '신규 캐릭터',
+            'rerun_character': '복각 캐릭터',
+            'new_lightcone': '신규 광추',
+            'rerun_lightcone': '복각 광추',
+            'new_relic': '신규 유물',
+            'new_trailblaze': '신규 개척 임무',
+            'new_companion': '신규 동행 임무',
+            'new_adventure': '신규 모험 임무',
+            'new_costume': '신규 코스튬',
+            'new_event': '신규 이벤트',
+            'support_event': '혜택 및 육성 지원',
+            'new_content': '신규 콘텐츠',
+            'new_enemy': '신규 적',
+            'new_material': '신규 재료',
+            'convenience': '편의성 업데이트',
+            'other': '기타'
+        };
+
+        // 페이지 초기화
+        async function initPage() {
+            checkAuth();
+            await loadVersionInfo();
+            await loadItems();
+        }
+
+        // 권한 확인
+        function checkAuth() {
+            const userStr = localStorage.getItem('user');
+            if (!userStr) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const user = JSON.parse(userStr);
+            if (!user.is_admin) {
+                window.location.href = 'index.html';
+            }
+        }
+
+        // 로그아웃
+        async function logout() {
+            await API.user.logout();
+        }
+
+        // 버전 정보 로드
+        async function loadVersionInfo() {
+            try {
+                const response = await API.versions.getById(versionId);
+                versionData = response.data;
+                document.getElementById('versionInfo').textContent =
+                    `버전 ${versionData.version_number} - ${versionData.version_name || ''}`;
+            } catch (error) {
+                console.error('Failed to load version info:', error);
+            }
+        }
+
+        // 항목 로드
+        async function loadItems() {
+            try {
+                const response = await API.versions.getItems(versionId);
+                itemsData = response.data;
+                displayItems();
+            } catch (error) {
+                console.error('Failed to load items:', error);
+                document.getElementById('items-container').innerHTML =
+                    '<div class="error-message">항목을 불러올 수 없습니다.</div>';
+            }
+        }
+
+        // 항목 표시
+        function displayItems() {
+            const container = document.getElementById('items-container');
+
+            if (!itemsData || !itemsData.grouped || Object.keys(itemsData.grouped).length === 0) {
+                container.innerHTML = '<div class="loading">등록된 항목이 없습니다.</div>';
+                return;
+            }
+
+            let html = '';
+            for (const [category, items] of Object.entries(itemsData.grouped)) {
+                html += `
+                    <div class="items-section">
+                        <div class="section-header">
+                            <h3>${categoryNames[category] || category} (${items.length}개)</h3>
+                        </div>
+                        <div class="items-grid">
+                            ${items.map(item => renderItemCard(item)).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        // 항목 카드 렌더링
+        function renderItemCard(item) {
+            const additionalData = item.additional_data ? JSON.parse(item.additional_data) : {};
+            const imageUrl = additionalData.image_url || item.image_url || '';
+            const displayName = additionalData.name || additionalData.title || item.item_name;
+
+            // 카테고리별 배지 생성
+            let badges = [];
+
+            if (item.is_featured == 1) {
+                badges.push('<span class="badge badge-featured">주요</span>');
+            }
+
+            // 카테고리별 정보 표시
+            switch(item.category) {
+                case 'new_character':
+                case 'rerun_character':
+                    if (additionalData.rarity) badges.push(`<span class="badge badge-rarity">${additionalData.rarity}</span>`);
+                    if (additionalData.element) badges.push(`<span class="badge badge-element">${additionalData.element}</span>`);
+                    if (additionalData.path) badges.push(`<span class="badge badge-path">${additionalData.path}</span>`);
+                    break;
+
+                case 'new_lightcone':
+                case 'rerun_lightcone':
+                    if (additionalData.rarity) badges.push(`<span class="badge badge-rarity">${additionalData.rarity}</span>`);
+                    if (additionalData.path) badges.push(`<span class="badge badge-path">${additionalData.path}</span>`);
+                    break;
+
+                case 'new_relic':
+                    if (additionalData.type) badges.push(`<span class="badge badge-type">${additionalData.type}</span>`);
+                    break;
+
+                case 'new_material':
+                    if (additionalData.rarity) badges.push(`<span class="badge badge-rarity">${additionalData.rarity}</span>`);
+                    if (additionalData.usage) badges.push(`<span class="badge badge-type">${additionalData.usage}</span>`);
+                    break;
+
+                case 'new_path':
+                    if (additionalData.role) badges.push(`<span class="badge badge-path">${additionalData.role}</span>`);
+                    if (additionalData.taunt_value) badges.push(`<span class="badge badge-type">도발 ${additionalData.taunt_value}</span>`);
+                    break;
+
+                case 'new_field':
+                    if (additionalData.region) badges.push(`<span class="badge badge-element">${additionalData.region}</span>`);
+                    if (additionalData.sub_region) badges.push(`<span class="badge badge-type">${additionalData.sub_region}</span>`);
+                    break;
+
+                case 'new_event':
+                    if (additionalData.event_type) badges.push(`<span class="badge badge-type">${additionalData.event_type}</span>`);
+                    break;
+
+                case 'new_enemy':
+                    if (additionalData.element_weakness) {
+                        badges.push(`<span class="badge badge-element">약점: ${additionalData.element_weakness}</span>`);
+                    }
+                    break;
+            }
+
+            // 설명 텍스트 생성
+            let descriptionText = '';
+            if (additionalData.description) {
+                descriptionText = additionalData.description;
+            } else if (additionalData.nickname) {
+                descriptionText = additionalData.nickname;
+            } else if (additionalData.subtitle) {
+                descriptionText = additionalData.subtitle;
+            } else if (item.description) {
+                descriptionText = item.description;
+            }
+
+            // 썸네일 HTML
+            const thumbnailHtml = imageUrl
+                ? `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(displayName)}" onerror="this.parentElement.innerHTML='<div class=\\'item-thumbnail-placeholder\\'>이미지 없음</div>'">`
+                : '<div class="item-thumbnail-placeholder">이미지 없음</div>';
+
+            return `
+                <div class="item-card ${item.is_featured == 1 ? 'featured' : ''}">
+                    <div class="item-thumbnail">
+                        ${thumbnailHtml}
+                    </div>
+                    <div class="item-content">
+                        <div class="item-name">${escapeHtml(displayName)}</div>
+                        ${badges.length > 0 ? `<div class="item-meta">${badges.join('')}</div>` : ''}
+                        ${descriptionText ? `<div class="item-description">${escapeHtml(descriptionText)}</div>` : ''}
+                        <div class="action-buttons">
+                            <button class="btn btn-primary btn-small" onclick="openEditModal(${item.item_id})">수정</button>
+                            <button class="btn btn-danger btn-small" onclick="deleteItem(${item.item_id})">삭제</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 항목 생성 모달 열기
+        function openCreateModal() {
+            editingItemId = null;
+            document.getElementById('modalTitle').textContent = '새 항목 추가';
+            document.getElementById('itemForm').reset();
+            document.getElementById('itemId').value = '';
+            document.getElementById('modalMessage').innerHTML = '';
+            document.getElementById('dynamicFields').innerHTML = '';
+            document.getElementById('itemModal').classList.add('active');
+        }
+
+        // 항목 수정 모달 열기
+        function openEditModal(itemId) {
+            editingItemId = itemId;
+            const item = findItemById(itemId);
+
+            if (!item) {
+                alert('항목을 찾을 수 없습니다.');
+                return;
+            }
+
+            console.log('Opening edit modal for item:', item);
+
+            document.getElementById('modalTitle').textContent = '항목 수정';
+            document.getElementById('itemId').value = item.item_id;
+            document.getElementById('category').value = item.category;
+            document.getElementById('isFeatured').checked = item.is_featured == 1;
+            document.getElementById('modalMessage').innerHTML = '';
+
+            // 카테고리별 폼 필드 생성
+            updateFormFields();
+
+            // DOM 업데이트 후 값 채우기 (setTimeout 사용)
+            setTimeout(() => {
+                if (item.additional_data) {
+                    try {
+                        const additionalData = JSON.parse(item.additional_data);
+                        console.log('Additional data:', additionalData);
+
+                        for (const [key, value] of Object.entries(additionalData)) {
+                            const input = document.getElementById(`field_${key}`);
+                            if (input) {
+                                if (input.type === 'checkbox') {
+                                    input.checked = value;
+                                } else {
+                                    input.value = value;
+                                }
+
+                                // 이미지 필드면 미리보기 업데이트
+                                if (key === 'image_url' && value && typeof updateImagePreview === 'function') {
+                                    updateImagePreview(`field_${key}`);
+                                }
+                            } else {
+                                console.warn(`Field not found: field_${key}`);
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Failed to parse additional_data:', e);
+                    }
+                }
+            }, 100);
+
+            document.getElementById('itemModal').classList.add('active');
+        }
+
+        // 모달 닫기
+        function closeModal() {
+            document.getElementById('itemModal').classList.remove('active');
+        }
+
+        // 항목 폼 제출
+        document.getElementById('itemForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const category = document.getElementById('category').value;
+            const isFeatured = document.getElementById('isFeatured').checked ? 1 : 0;
+
+            // 동적 필드에서 데이터 수집
+            const additionalData = {};
+            const dynamicInputs = document.querySelectorAll('#dynamicFields input, #dynamicFields select, #dynamicFields textarea');
+
+            dynamicInputs.forEach(input => {
+                const fieldName = input.id.replace('field_', '');
+                if (input.type === 'checkbox') {
+                    additionalData[fieldName] = input.checked;
+                } else if (input.type === 'number') {
+                    additionalData[fieldName] = input.value ? Number(input.value) : null;
+                } else {
+                    additionalData[fieldName] = input.value;
+                }
+            });
+
+            // item_name을 additional_data의 name에서 가져오기
+            const itemName = additionalData.name || additionalData.title || '제목 없음';
+
+            const itemData = {
+                category: category,
+                item_name: itemName,
+                item_name_en: additionalData.name_en || null,
+                description: additionalData.description || null,
+                image_url: additionalData.image_url || null,
+                rarity: 'common',
+                sort_order: 0,
+                is_featured: isFeatured,
+                additional_data: JSON.stringify(additionalData)
+            };
+
+            try {
+                if (editingItemId) {
+                    await API.versions.updateItem(versionId, editingItemId, itemData);
+                    showMessage('success', '항목이 수정되었습니다.');
+                } else {
+                    await API.versions.addItem(versionId, itemData);
+                    showMessage('success', '항목이 추가되었습니다.');
+                }
+
+                setTimeout(() => {
+                    closeModal();
+                    loadItems();
+                }, 1500);
+            } catch (error) {
+                showMessage('error', '저장에 실패했습니다: ' + error.message);
+            }
+        });
+
+        // 항목 삭제
+        async function deleteItem(itemId) {
+            if (!confirm('정말 이 항목을 삭제하시겠습니까?')) {
+                return;
+            }
+
+            try {
+                await API.versions.deleteItem(versionId, itemId);
+                alert('항목이 삭제되었습니다.');
+                loadItems();
+            } catch (error) {
+                alert('삭제에 실패했습니다: ' + error.message);
+            }
+        }
+
+        // 항목 찾기
+        function findItemById(itemId) {
+            if (!itemsData || !itemsData.items) return null;
+            return itemsData.items.find(item => item.item_id == itemId);
+        }
+
+        // 메시지 표시
+        function showMessage(type, message) {
+            const messageDiv = document.getElementById('modalMessage');
+            messageDiv.className = type === 'success' ? 'success-message' : 'error-message';
+            messageDiv.textContent = message;
+        }
+
+        // 유틸리티
+        function escapeHtml(text) {
+            if (!text) return '';
+            const map = {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'};
+            return text.toString().replace(/[&<>"']/g, m => map[m]);
+        }
+
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', initPage);
+
+        // 모달 외부 클릭 시 닫기
+        window.onclick = function(event) {
+            const modal = document.getElementById('itemModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인 - GameInfo</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .login-container {
+            max-width: 400px;
+            width: 100%;
+            padding: 48px;
+            background: #12171e;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .login-header h2 {
+            margin: 0 0 8px 0;
+            color: #e6e6e6;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .login-header .site-name {
+            color: #60a5fa;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .login-header p {
+            margin: 0;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #e6e6e6;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+            background: #0a0e14;
+            color: #e6e6e6;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #60a5fa;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: #60a5fa;
+            color: #0a0e14;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-login:hover {
+            background: #3b82f6;
+        }
+
+        .btn-login:disabled {
+            background: #6b7280;
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            background: rgba(248, 113, 113, 0.2);
+            color: #f87171;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            border-left: 3px solid #f87171;
+            font-size: 14px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .login-footer {
+            margin-top: 24px;
+            text-align: center;
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .login-footer a {
+            color: #60a5fa;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .login-footer a:hover {
+            color: #3b82f6;
+        }
+
+        .login-footer p {
+            margin: 8px 0;
+        }
+
+        .login-footer .admin-info {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="site-name">GameInfo</div>
+            <p>게임 정보 트래커</p>
+        </div>
+
+        <div id="error-message" class="error-message"></div>
+
+        <form id="login-form">
+            <div class="form-group">
+                <label for="username">사용자명</label>
+                <input type="text" id="username" name="username" required autocomplete="username">
+            </div>
+
+            <div class="form-group">
+                <label for="password">비밀번호</label>
+                <input type="password" id="password" name="password" required autocomplete="current-password">
+            </div>
+
+            <button type="submit" class="btn-login" id="btn-login">로그인</button>
+        </form>
+
+        <div class="login-footer">
+            <p><a href="index.html">홈으로 돌아가기</a></p>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script>
+        const loginForm = document.getElementById('login-form');
+        const errorMessage = document.getElementById('error-message');
+        const btnLogin = document.getElementById('btn-login');
+
+        // 이미 로그인되어 있으면 리다이렉트
+        if (localStorage.getItem('authToken')) {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (user.is_admin) {
+                window.location.href = 'admin.html';
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // 버튼 비활성화
+            btnLogin.disabled = true;
+            btnLogin.textContent = '로그인 중...';
+            errorMessage.classList.remove('show');
+
+            try {
+                const response = await API.user.login(username, password);
+
+                if (response.success) {
+                    // 로그인 성공
+                    const user = response.data.user;
+
+                    if (user.is_admin) {
+                        window.location.href = 'admin.html';
+                    } else {
+                        window.location.href = 'index.html';
+                    }
+                } else {
+                    throw new Error(response.error?.message || '로그인 실패');
+                }
+            } catch (error) {
+                errorMessage.textContent = error.message || '로그인에 실패했습니다.';
+                errorMessage.classList.add('show');
+
+                btnLogin.disabled = false;
+                btnLogin.textContent = '로그인';
+            }
+        });
+    </script>
+</body>
+</html>

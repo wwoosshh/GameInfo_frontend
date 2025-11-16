@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="게임 업데이트 정보를 한눈에 확인하세요">
+    <title>GameInfo - 게임 정보 트래커</title>
+    <link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="main-header">
+        <div class="container">
+            <div class="header-content">
+                <h1 class="site-title">
+                    <a href="index.html">GameInfo</a>
+                </h1>
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="index.html" class="active">홈</a></li>
+                        <li><a href="calendar.html">캘린더</a></li>
+                        <li><a href="games.html">게임 목록</a></li>
+                        <li><a href="login.html">로그인</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="main-content">
+        <div class="container">
+            <!-- 환영 섹션 -->
+            <section class="welcome-section">
+                <h2>다가오는 게임 업데이트</h2>
+                <p>좋아하는 게임의 업데이트 일정을 놓치지 마세요!</p>
+            </section>
+
+            <!-- 업데이트 목록 -->
+            <section class="updates-section">
+                <div class="section-header">
+                    <h3>이번 주 예정된 업데이트</h3>
+                    <a href="calendar.html" class="view-all">전체 보기 &rarr;</a>
+                </div>
+
+                <div id="updates-list" class="updates-grid">
+                    <!-- JavaScript로 동적 로드 -->
+                    <div class="loading">로딩 중...</div>
+                </div>
+            </section>
+
+            <!-- 게임 목록 -->
+            <section class="games-section">
+                <div class="section-header">
+                    <h3>인기 게임</h3>
+                    <a href="games.html" class="view-all">전체 보기 &rarr;</a>
+                </div>
+
+                <div id="games-list" class="games-grid">
+                    <!-- JavaScript로 동적 로드 -->
+                    <div class="loading">로딩 중...</div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- 푸터 -->
+    <footer class="main-footer">
+        <div class="container">
+            <p>&copy; 2025 GameInfo. 대학교 과제 프로젝트</p>
+            <p>모든 게임 관련 상표는 해당 소유자의 자산입니다.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="../js/api.js"></script>
+    <script src="../js/app.js"></script>
+</body>
+</html>

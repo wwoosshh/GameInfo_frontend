@@ -1,0 +1,16 @@
+{
+  "name": "game-update-tracker-frontend",
+  "version": "1.0.0",
+  "description": "게임 업데이트 트래커 프론트엔드",
+  "scripts": {
+    "dev": "npx http-server -p 8000",
+    "deploy": "vercel --prod"
+  },
+  "keywords": [
+    "game",
+    "tracker",
+    "frontend"
+  ],
+  "author": "",
+  "license": "MIT"
+}
