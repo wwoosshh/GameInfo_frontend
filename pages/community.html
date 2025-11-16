@@ -219,9 +219,137 @@
             color: var(--text-secondary);
             margin-bottom: 16px;
         }
+
+        /* 공지사항 팝업 */
+        .announcement-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .announcement-overlay.show {
+            display: flex;
+        }
+
+        .announcement-modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--divider);
+            border-radius: 8px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .announcement-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--divider);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .announcement-header h3 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .announcement-header .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .announcement-header .close-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .announcement-content {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .announcement-content p {
+            line-height: 1.6;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .announcement-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--divider);
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .announcement-footer button {
+            padding: 8px 16px;
+            border: 1px solid var(--divider);
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .announcement-footer .btn-hide-day {
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+        }
+
+        .announcement-footer .btn-hide-day:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .announcement-footer .btn-close {
+            background: var(--accent-blue);
+            color: var(--bg-primary);
+            border-color: var(--accent-blue);
+        }
+
+        .announcement-footer .btn-close:hover {
+            background: #3b82f6;
+        }
     </style>
 </head>
 <body>
+    <!-- 공지사항 팝업 -->
+    <div id="announcement-overlay" class="announcement-overlay">
+        <div class="announcement-modal">
+            <div class="announcement-header">
+                <h3 id="announcement-title">공지사항</h3>
+                <button class="close-btn" onclick="closeAnnouncement()">&times;</button>
+            </div>
+            <div id="announcement-content" class="announcement-content"></div>
+            <div class="announcement-footer">
+                <button class="btn-hide-day" onclick="hideAnnouncementForDay()">하루동안 보지 않기</button>
+                <button class="btn-close" onclick="closeAnnouncement()">닫기</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 헤더 -->
     <header class="main-header">
         <div class="container">
@@ -313,6 +441,7 @@
         document.addEventListener('DOMContentLoaded', async () => {
             await loadGames();
             await loadPosts();
+            await loadAnnouncements();
 
             // 필터 이벤트 리스너
             document.getElementById('category-filter').addEventListener('change', handleFilterChange);
@@ -480,6 +609,81 @@
             }
             window.location.href = 'community_write.html';
         }
+
+        // 공지사항 로드
+        async function loadAnnouncements() {
+            // 하루동안 보지 않기 확인
+            const hideUntil = localStorage.getItem('hideAnnouncementsUntil');
+            if (hideUntil) {
+                const hideTime = new Date(hideUntil);
+                if (hideTime > new Date()) {
+                    console.log('공지사항 숨김 (24시간 유지)');
+                    return;
+                }
+                // 만료되었으면 제거
+                localStorage.removeItem('hideAnnouncementsUntil');
+            }
+
+            try {
+                const response = await fetch(`${API.baseURL}/announcements`, {
+                    headers: API.getHeaders()
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.data && data.data.length > 0) {
+                    // 가장 최근 공지사항 표시
+                    showAnnouncement(data.data[0]);
+                }
+            } catch (error) {
+                console.error('Failed to load announcements:', error);
+            }
+        }
+
+        // 공지사항 표시
+        function showAnnouncement(announcement) {
+            const overlay = document.getElementById('announcement-overlay');
+            const titleEl = document.getElementById('announcement-title');
+            const contentEl = document.getElementById('announcement-content');
+
+            titleEl.textContent = announcement.title;
+
+            // 내용 표시 (HTML 이스케이프 처리)
+            let content = announcement.content || '';
+            content = content.replace(/\n/g, '<br>');
+            contentEl.innerHTML = `<p>${content}</p>`;
+
+            // 링크가 있으면 추가
+            if (announcement.link_url) {
+                contentEl.innerHTML += `<p><a href="${announcement.link_url}" target="_blank" style="color: var(--accent-blue);">자세히 보기</a></p>`;
+            }
+
+            overlay.classList.add('show');
+        }
+
+        // 공지사항 닫기
+        function closeAnnouncement() {
+            const overlay = document.getElementById('announcement-overlay');
+            overlay.classList.remove('show');
+        }
+
+        // 하루동안 보지 않기
+        function hideAnnouncementForDay() {
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            localStorage.setItem('hideAnnouncementsUntil', tomorrow.toISOString());
+            closeAnnouncement();
+        }
+
+        // 오버레이 클릭 시 닫기
+        document.addEventListener('DOMContentLoaded', () => {
+            const overlay = document.getElementById('announcement-overlay');
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    closeAnnouncement();
+                }
+            });
+        });
     </script>
 </body>
 </html>
