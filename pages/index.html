@@ -16,11 +16,13 @@
                     <a href="index.html">GameInfo</a>
                 </h1>
                 <nav class="main-nav">
-                    <ul>
+                    <ul id="main-nav-list">
                         <li><a href="index.html" class="active">홈</a></li>
                         <li><a href="calendar.html">캘린더</a></li>
                         <li><a href="games.html">게임 목록</a></li>
-                        <li><a href="login.html">로그인</a></li>
+                        <li id="nav-community" style="display:none;"><a href="community.html">커뮤니티</a></li>
+                        <li id="nav-login"><a href="login.html">로그인</a></li>
+                        <li id="nav-logout" style="display:none;"><a href="#" onclick="handleLogout(event)">로그아웃</a></li>
                     </ul>
                 </nav>
             </div>
@@ -75,5 +77,46 @@
     <!-- JavaScript -->
     <script src="../js/api.js"></script>
     <script src="../js/app.js"></script>
+    <script>
+        // 네비게이션 상태 업데이트
+        function updateNavigation() {
+            const token = localStorage.getItem('authToken');
+            const navLogin = document.getElementById('nav-login');
+            const navLogout = document.getElementById('nav-logout');
+            const navCommunity = document.getElementById('nav-community');
+
+            if (token) {
+                // 로그인 상태
+                navLogin.style.display = 'none';
+                navLogout.style.display = 'block';
+                navCommunity.style.display = 'block';
+            } else {
+                // 로그아웃 상태
+                navLogin.style.display = 'block';
+                navLogout.style.display = 'none';
+                navCommunity.style.display = 'none';
+            }
+        }
+
+        // 로그아웃 처리
+        async function handleLogout(event) {
+            event.preventDefault();
+
+            if (confirm('로그아웃하시겠습니까?')) {
+                try {
+                    await API.user.logout();
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    // 에러가 발생해도 로컬 스토리지는 삭제
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('user');
+                    window.location.reload();
+                }
+            }
+        }
+
+        // 페이지 로드 시 네비게이션 업데이트
+        updateNavigation();
+    </script>
 </body>
 </html>

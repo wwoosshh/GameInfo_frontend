@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입 - GameInfo</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .register-container {
+            max-width: 400px;
+            width: 100%;
+            padding: 48px;
+            background: #12171e;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .register-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .register-header h2 {
+            margin: 0 0 8px 0;
+            color: #e6e6e6;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .register-header .site-name {
+            color: #60a5fa;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .register-header p {
+            margin: 0;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #e6e6e6;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+            background: #0a0e14;
+            color: #e6e6e6;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #60a5fa;
+        }
+
+        .form-group .help-text {
+            margin-top: 4px;
+            color: #6b7280;
+            font-size: 12px;
+        }
+
+        .btn-register {
+            width: 100%;
+            padding: 12px;
+            background: #60a5fa;
+            color: #0a0e14;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-register:hover {
+            background: #3b82f6;
+        }
+
+        .btn-register:disabled {
+            background: #6b7280;
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            background: rgba(248, 113, 113, 0.2);
+            color: #f87171;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            border-left: 3px solid #f87171;
+            font-size: 14px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .success-message {
+            background: rgba(74, 222, 128, 0.2);
+            color: #4ade80;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            border-left: 3px solid #4ade80;
+            font-size: 14px;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .register-footer {
+            margin-top: 24px;
+            text-align: center;
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .register-footer a {
+            color: #60a5fa;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .register-footer a:hover {
+            color: #3b82f6;
+        }
+
+        .register-footer p {
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-header">
+            <div class="site-name">GameInfo</div>
+            <h2>회원가입</h2>
+            <p>새로운 계정을 만들어보세요</p>
+        </div>
+
+        <div id="error-message" class="error-message"></div>
+        <div id="success-message" class="success-message"></div>
+
+        <form id="register-form">
+            <div class="form-group">
+                <label for="username">사용자명 *</label>
+                <input type="text" id="username" name="username" required autocomplete="username" minlength="3" maxlength="50">
+                <div class="help-text">3-50자, 영문/숫자/언더스코어 가능</div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">이메일 *</label>
+                <input type="email" id="email" name="email" required autocomplete="email">
+            </div>
+
+            <div class="form-group">
+                <label for="display-name">닉네임</label>
+                <input type="text" id="display-name" name="display_name" autocomplete="name" maxlength="100">
+                <div class="help-text">비워두면 사용자명이 사용됩니다</div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">비밀번호 *</label>
+                <input type="password" id="password" name="password" required autocomplete="new-password" minlength="6">
+                <div class="help-text">최소 6자 이상</div>
+            </div>
+
+            <div class="form-group">
+                <label for="password-confirm">비밀번호 확인 *</label>
+                <input type="password" id="password-confirm" name="password_confirm" required autocomplete="new-password">
+            </div>
+
+            <button type="submit" class="btn-register" id="btn-register">회원가입</button>
+        </form>
+
+        <div class="register-footer">
+            <p>이미 계정이 있으신가요? <a href="login.html">로그인</a></p>
+            <p><a href="index.html">홈으로 돌아가기</a></p>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script>
+        const registerForm = document.getElementById('register-form');
+        const errorMessage = document.getElementById('error-message');
+        const successMessage = document.getElementById('success-message');
+        const btnRegister = document.getElementById('btn-register');
+
+        // 이미 로그인되어 있으면 리다이렉트
+        if (localStorage.getItem('authToken')) {
+            window.location.href = 'index.html';
+        }
+
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const displayName = document.getElementById('display-name').value;
+            const password = document.getElementById('password').value;
+            const passwordConfirm = document.getElementById('password-confirm').value;
+
+            // 클라이언트 측 유효성 검사
+            errorMessage.classList.remove('show');
+            successMessage.classList.remove('show');
+
+            if (password !== passwordConfirm) {
+                errorMessage.textContent = '비밀번호가 일치하지 않습니다.';
+                errorMessage.classList.add('show');
+                return;
+            }
+
+            if (password.length < 6) {
+                errorMessage.textContent = '비밀번호는 최소 6자 이상이어야 합니다.';
+                errorMessage.classList.add('show');
+                return;
+            }
+
+            // 버튼 비활성화
+            btnRegister.disabled = true;
+            btnRegister.textContent = '처리 중...';
+
+            try {
+                const userData = {
+                    username,
+                    email,
+                    password
+                };
+
+                if (displayName) {
+                    userData.display_name = displayName;
+                }
+
+                const response = await API.user.register(userData);
+
+                if (response.success) {
+                    // 회원가입 성공
+                    successMessage.textContent = '회원가입이 완료되었습니다! 잠시 후 메인 페이지로 이동합니다...';
+                    successMessage.classList.add('show');
+
+                    // 2초 후 메인 페이지로 이동
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 2000);
+                } else {
+                    throw new Error(response.error?.message || '회원가입 실패');
+                }
+            } catch (error) {
+                let errorText = '회원가입에 실패했습니다.';
+
+                if (error.message.includes('already')) {
+                    errorText = '이미 사용 중인 사용자명입니다.';
+                } else if (error.message) {
+                    errorText = error.message;
+                }
+
+                errorMessage.textContent = errorText;
+                errorMessage.classList.add('show');
+
+                btnRegister.disabled = false;
+                btnRegister.textContent = '회원가입';
+            }
+        });
+    </script>
+</body>
+</html>
