@@ -659,6 +659,9 @@
             const grid = document.getElementById('calendar-grid');
             const monthDisplay = document.getElementById('current-month');
 
+            console.log(`Rendering calendar for ${currentYear}-${currentMonth + 1}`);
+            console.log(`Total user events: ${userEvents.length}`, userEvents);
+
             // 월 표시 업데이트
             monthDisplay.textContent = `${currentYear}년 ${currentMonth + 1}월`;
 
@@ -732,6 +735,11 @@
             const gameEventList = events.filter(event => event.date === dateStr);
             const userEventList = userEvents.filter(event => event.date === dateStr);
             const allEvents = [...gameEventList, ...userEventList];
+
+            // 디버깅: 일정이 있는 날짜만 로그
+            if (allEvents.length > 0) {
+                console.log(`Date ${dateStr} has ${allEvents.length} events:`, allEvents);
+            }
 
             allEvents.slice(0, 3).forEach(event => {
                 const eventDot = document.createElement('div');
@@ -878,13 +886,22 @@
                 return;
             }
 
+            console.log('Opening add event modal with date:', date);
+
             currentEditingEventId = null;
             document.getElementById('modal-title').textContent = '일정 추가';
             document.getElementById('btn-delete-event').style.display = 'none';
 
             // 폼 초기화
             document.getElementById('event-form').reset();
-            document.getElementById('event-date').value = date;
+
+            // reset() 후에 날짜 설정 (reset이 날짜를 지울 수 있음)
+            // setTimeout으로 reset이 완전히 완료된 후 설정
+            setTimeout(() => {
+                document.getElementById('event-date').value = date;
+                console.log('Date field set to:', date);
+            }, 0);
+
             document.getElementById('event-time').disabled = false;
 
             // 모달 표시
