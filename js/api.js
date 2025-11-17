@@ -469,3 +469,6 @@ const API = {
 
 // 전역에서 사용 가능하도록 export
 window.API = API;
+
+// API 버전 확인 (디버깅용)
+console.log('API loaded with calendarEvents:', typeof API.calendarEvents !== 'undefined');
