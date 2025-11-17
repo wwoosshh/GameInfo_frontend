@@ -560,10 +560,28 @@
         document.addEventListener('DOMContentLoaded', () => {
             // 관리자 권한 확인
             const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const token = localStorage.getItem('authToken');
+
+            console.log('Current user:', user);
+            console.log('Auth token:', token);
+
+            // JWT 토큰 디코딩 (페이로드 부분만)
+            if (token) {
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    console.log('JWT payload:', payload);
+                    console.log('User roles from JWT:', payload.roles);
+                } catch (e) {
+                    console.error('Failed to decode JWT:', e);
+                }
+            }
+
+            // 관리자 권한 확인 (user.username === 'admin' 또는 is_admin)
             if (!user.is_admin && user.username !== 'admin') {
-                alert('관리자 권한이 필요합니다.');
-                window.location.href = 'index.html';
-                return;
+                console.warn('User does not have admin privileges');
+                // alert('관리자 권한이 필요합니다.');
+                // window.location.href = 'index.html';
+                // return;
             }
 
             loadUsers();
@@ -582,18 +600,27 @@
                     is_active: document.getElementById('users-active')?.value || ''
                 };
 
+                console.log('Loading users with params:', params);
                 const response = await API.admin.users.getAll(params);
+                console.log('Users API response:', response);
 
-                if (response.success && response.data.users) {
-                    displayUsers(response.data.users);
-                    updatePagination('users', response.data.pagination);
-                    updateStats('users', response.data);
+                if (response && response.success && response.data) {
+                    if (response.data.users) {
+                        displayUsers(response.data.users);
+                        updatePagination('users', response.data.pagination);
+                        updateStats('users', response.data);
+                    } else {
+                        console.error('No users array in response:', response.data);
+                        container.innerHTML = '<div class="empty-state">응답 데이터 형식이 올바르지 않습니다.</div>';
+                    }
                 } else {
-                    container.innerHTML = '<div class="empty-state">유저 목록을 불러올 수 없습니다.</div>';
+                    console.error('Invalid response structure:', response);
+                    const errorMsg = response?.error?.message || response?.message || '알 수 없는 오류';
+                    container.innerHTML = `<div class="empty-state">유저 목록을 불러올 수 없습니다.<br>오류: ${errorMsg}</div>`;
                 }
             } catch (error) {
                 console.error('Failed to load users:', error);
-                container.innerHTML = '<div class="empty-state">유저 목록을 불러오는데 실패했습니다.</div>';
+                container.innerHTML = `<div class="empty-state">유저 목록을 불러오는데 실패했습니다.<br>오류: ${error.message}</div>`;
             }
         }
 
@@ -688,18 +715,27 @@
                     is_deleted: document.getElementById('posts-deleted')?.value || 'false'
                 };
 
+                console.log('Loading posts with params:', params);
                 const response = await API.admin.posts.getAll(params);
+                console.log('Posts API response:', response);
 
-                if (response.success && response.data.posts) {
-                    displayPosts(response.data.posts);
-                    updatePagination('posts', response.data.pagination);
-                    updateStats('posts', response.data);
+                if (response && response.success && response.data) {
+                    if (response.data.posts) {
+                        displayPosts(response.data.posts);
+                        updatePagination('posts', response.data.pagination);
+                        updateStats('posts', response.data);
+                    } else {
+                        console.error('No posts array in response:', response.data);
+                        container.innerHTML = '<div class="empty-state">응답 데이터 형식이 올바르지 않습니다.</div>';
+                    }
                 } else {
-                    container.innerHTML = '<div class="empty-state">게시글 목록을 불러올 수 없습니다.</div>';
+                    console.error('Invalid response structure:', response);
+                    const errorMsg = response?.error?.message || response?.message || '알 수 없는 오류';
+                    container.innerHTML = `<div class="empty-state">게시글 목록을 불러올 수 없습니다.<br>오류: ${errorMsg}</div>`;
                 }
             } catch (error) {
                 console.error('Failed to load posts:', error);
-                container.innerHTML = '<div class="empty-state">게시글 목록을 불러오는데 실패했습니다.</div>';
+                container.innerHTML = `<div class="empty-state">게시글 목록을 불러오는데 실패했습니다.<br>오류: ${error.message}</div>`;
             }
         }
 
@@ -811,18 +847,27 @@
                     is_deleted: document.getElementById('comments-deleted')?.value || 'false'
                 };
 
+                console.log('Loading comments with params:', params);
                 const response = await API.admin.comments.getAll(params);
+                console.log('Comments API response:', response);
 
-                if (response.success && response.data.comments) {
-                    displayComments(response.data.comments);
-                    updatePagination('comments', response.data.pagination);
-                    updateStats('comments', response.data);
+                if (response && response.success && response.data) {
+                    if (response.data.comments) {
+                        displayComments(response.data.comments);
+                        updatePagination('comments', response.data.pagination);
+                        updateStats('comments', response.data);
+                    } else {
+                        console.error('No comments array in response:', response.data);
+                        container.innerHTML = '<div class="empty-state">응답 데이터 형식이 올바르지 않습니다.</div>';
+                    }
                 } else {
-                    container.innerHTML = '<div class="empty-state">댓글 목록을 불러올 수 없습니다.</div>';
+                    console.error('Invalid response structure:', response);
+                    const errorMsg = response?.error?.message || response?.message || '알 수 없는 오류';
+                    container.innerHTML = `<div class="empty-state">댓글 목록을 불러올 수 없습니다.<br>오류: ${errorMsg}</div>`;
                 }
             } catch (error) {
                 console.error('Failed to load comments:', error);
-                container.innerHTML = '<div class="empty-state">댓글 목록을 불러오는데 실패했습니다.</div>';
+                container.innerHTML = `<div class="empty-state">댓글 목록을 불러오는데 실패했습니다.<br>오류: ${error.message}</div>`;
             }
         }
 
@@ -904,18 +949,27 @@
                     reported_type: document.getElementById('reports-type')?.value || ''
                 };
 
+                console.log('Loading reports with params:', params);
                 const response = await API.admin.reports.getAll(params);
+                console.log('Reports API response:', response);
 
-                if (response.success && response.data.reports) {
-                    displayReports(response.data.reports);
-                    updatePagination('reports', response.data.pagination);
-                    updateStats('reports', response.data);
+                if (response && response.success && response.data) {
+                    if (response.data.reports) {
+                        displayReports(response.data.reports);
+                        updatePagination('reports', response.data.pagination);
+                        updateStats('reports', response.data);
+                    } else {
+                        console.error('No reports array in response:', response.data);
+                        container.innerHTML = '<div class="empty-state">응답 데이터 형식이 올바르지 않습니다.</div>';
+                    }
                 } else {
-                    container.innerHTML = '<div class="empty-state">신고 목록을 불러올 수 없습니다.</div>';
+                    console.error('Invalid response structure:', response);
+                    const errorMsg = response?.error?.message || response?.message || '알 수 없는 오류';
+                    container.innerHTML = `<div class="empty-state">신고 목록을 불러올 수 없습니다.<br>오류: ${errorMsg}</div>`;
                 }
             } catch (error) {
                 console.error('Failed to load reports:', error);
-                container.innerHTML = '<div class="empty-state">신고 목록을 불러오는데 실패했습니다.</div>';
+                container.innerHTML = `<div class="empty-state">신고 목록을 불러오는데 실패했습니다.<br>오류: ${error.message}</div>`;
             }
         }
 
