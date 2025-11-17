@@ -918,6 +918,22 @@
             document.getElementById('modal-title').textContent = '일정 수정';
             document.getElementById('btn-delete-event').style.display = 'block';
 
+            // 캐시된 이벤트 데이터 사용 (즉시 표시)
+            const cachedEvent = userEvents.find(e => e.event_id === eventId);
+            if (cachedEvent) {
+                // 즉시 모달 열고 데이터 표시
+                document.getElementById('event-title').value = cachedEvent.title;
+                document.getElementById('event-description').value = cachedEvent.description || '';
+                document.getElementById('event-date').value = cachedEvent.date;
+                document.getElementById('event-time').value = cachedEvent.event_time || '';
+                document.getElementById('is-all-day').checked = cachedEvent.is_all_day || false;
+                document.getElementById('event-time').disabled = cachedEvent.is_all_day || false;
+
+                document.getElementById('event-modal').classList.add('show');
+                return;
+            }
+
+            // 캐시에 없으면 API 호출 (fallback)
             try {
                 const response = await API.calendarEvents.getById(eventId);
 

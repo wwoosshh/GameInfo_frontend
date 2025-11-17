@@ -4,6 +4,81 @@
  * 백엔드 API와의 통신을 담당합니다.
  */
 
+// 캐시 유틸리티
+const Cache = {
+    /**
+     * 캐시에서 데이터 가져오기
+     * @param {string} key - 캐시 키
+     * @param {number} maxAge - 최대 유효 시간 (밀리초)
+     * @returns {any|null} 캐시된 데이터 또는 null
+     */
+    get(key, maxAge = 5 * 60 * 1000) { // 기본 5분
+        try {
+            const cached = localStorage.getItem(key);
+            if (!cached) return null;
+
+            const { data, timestamp } = JSON.parse(cached);
+            const age = Date.now() - timestamp;
+
+            if (age > maxAge) {
+                localStorage.removeItem(key);
+                return null;
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Cache get error:', error);
+            return null;
+        }
+    },
+
+    /**
+     * 캐시에 데이터 저장
+     * @param {string} key - 캐시 키
+     * @param {any} data - 저장할 데이터
+     */
+    set(key, data) {
+        try {
+            const cacheData = {
+                data,
+                timestamp: Date.now()
+            };
+            localStorage.setItem(key, JSON.stringify(cacheData));
+        } catch (error) {
+            console.error('Cache set error:', error);
+        }
+    },
+
+    /**
+     * 캐시 삭제
+     * @param {string} key - 캐시 키
+     */
+    remove(key) {
+        try {
+            localStorage.removeItem(key);
+        } catch (error) {
+            console.error('Cache remove error:', error);
+        }
+    },
+
+    /**
+     * 패턴과 일치하는 모든 캐시 삭제
+     * @param {string} pattern - 삭제할 키 패턴
+     */
+    removeByPattern(pattern) {
+        try {
+            const keys = Object.keys(localStorage);
+            keys.forEach(key => {
+                if (key.includes(pattern)) {
+                    localStorage.removeItem(key);
+                }
+            });
+        } catch (error) {
+            console.error('Cache removeByPattern error:', error);
+        }
+    }
+};
+
 const API = {
     baseURL: window.location.hostname === 'localhost'
         ? 'http://localhost:8080/api'
@@ -72,15 +147,34 @@ const API = {
      */
     games: {
         /**
-         * 게임 목록 조회
+         * 게임 목록 조회 (캐싱 적용)
          *
          * @param {object} params - 쿼리 파라미터
+         * @param {boolean} useCache - 캐시 사용 여부 (기본값: true)
          * @returns {Promise}
          */
-        async getAll(params = {}) {
+        async getAll(params = {}, useCache = true) {
+            const cacheKey = `games_${JSON.stringify(params)}`;
+
+            // 캐시 확인
+            if (useCache) {
+                const cached = Cache.get(cacheKey);
+                if (cached) {
+                    console.log('Using cached games data');
+                    return cached;
+                }
+            }
+
             const queryString = new URLSearchParams(params).toString();
             const endpoint = `/games${queryString ? '?' + queryString : ''}`;
-            return API.request(endpoint);
+            const response = await API.request(endpoint);
+
+            // 응답 캐싱
+            if (response.success) {
+                Cache.set(cacheKey, response);
+            }
+
+            return response;
         },
 
         /**
@@ -100,10 +194,13 @@ const API = {
          * @returns {Promise}
          */
         async create(gameData) {
-            return API.request('/games', {
+            const response = await API.request('/games', {
                 method: 'POST',
                 body: JSON.stringify(gameData),
             });
+            // 게임 목록 캐시 무효화
+            Cache.removeByPattern('games_');
+            return response;
         },
 
         /**
@@ -114,10 +211,13 @@ const API = {
          * @returns {Promise}
          */
         async update(gameId, gameData) {
-            return API.request(`/games/${gameId}`, {
+            const response = await API.request(`/games/${gameId}`, {
                 method: 'PUT',
                 body: JSON.stringify(gameData),
             });
+            // 게임 목록 캐시 무효화
+            Cache.removeByPattern('games_');
+            return response;
         },
 
         /**
@@ -127,9 +227,12 @@ const API = {
          * @returns {Promise}
          */
         async delete(gameId) {
-            return API.request(`/games/${gameId}`, {
+            const response = await API.request(`/games/${gameId}`, {
                 method: 'DELETE',
             });
+            // 게임 목록 캐시 무효화
+            Cache.removeByPattern('games_');
+            return response;
         },
     },
 

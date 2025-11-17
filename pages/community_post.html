@@ -646,6 +646,14 @@
             const likeCount = document.getElementById('like-count');
             const isLiked = likeBtn.classList.contains('active');
 
+            // Optimistic UI: 즉시 UI 업데이트
+            const previousCount = parseInt(likeCount.textContent) || 0;
+            const newCount = isLiked ? previousCount - 1 : previousCount + 1;
+
+            likeBtn.classList.toggle('active');
+            likeIcon.textContent = isLiked ? '♡' : '♥';
+            likeCount.textContent = newCount;
+
             try {
                 const method = isLiked ? 'DELETE' : 'POST';
                 const response = await fetch(`${API.baseURL}/post_likes/${postId}`, {
@@ -656,13 +664,20 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    likeBtn.classList.toggle('active');
-                    likeIcon.textContent = isLiked ? '♡' : '♥';
+                    // 서버 응답으로 정확한 카운트 업데이트
                     likeCount.textContent = data.data.like_count || 0;
                 } else {
+                    // 실패 시 롤백
+                    likeBtn.classList.toggle('active');
+                    likeIcon.textContent = isLiked ? '♥' : '♡';
+                    likeCount.textContent = previousCount;
                     alert(data.error?.message || '좋아요 처리에 실패했습니다.');
                 }
             } catch (error) {
+                // 오류 시 롤백
+                likeBtn.classList.toggle('active');
+                likeIcon.textContent = isLiked ? '♥' : '♡';
+                likeCount.textContent = previousCount;
                 console.error('Failed to toggle like:', error);
                 alert('좋아요 처리 중 오류가 발생했습니다.');
             }
@@ -679,6 +694,10 @@
             const bookmarkIcon = document.getElementById('bookmark-icon');
             const isBookmarked = bookmarkBtn.classList.contains('active');
 
+            // Optimistic UI: 즉시 UI 업데이트
+            bookmarkBtn.classList.toggle('active');
+            bookmarkIcon.textContent = isBookmarked ? '☆' : '★';
+
             try {
                 const method = isBookmarked ? 'DELETE' : 'POST';
                 const response = await fetch(`${API.baseURL}/bookmarks/${postId}`, {
@@ -688,13 +707,16 @@
 
                 const data = await response.json();
 
-                if (data.success) {
+                if (!data.success) {
+                    // 실패 시 롤백
                     bookmarkBtn.classList.toggle('active');
-                    bookmarkIcon.textContent = isBookmarked ? '☆' : '★';
-                } else {
+                    bookmarkIcon.textContent = isBookmarked ? '★' : '☆';
                     alert(data.error?.message || '북마크 처리에 실패했습니다.');
                 }
             } catch (error) {
+                // 오류 시 롤백
+                bookmarkBtn.classList.toggle('active');
+                bookmarkIcon.textContent = isBookmarked ? '★' : '☆';
                 console.error('Failed to toggle bookmark:', error);
                 alert('북마크 처리 중 오류가 발생했습니다.');
             }
