@@ -932,13 +932,18 @@
                 return;
             }
 
+            const isAllDay = document.getElementById('is-all-day').checked;
+            const timeValue = document.getElementById('event-time').value;
+
             const eventData = {
                 event_title: document.getElementById('event-title').value.trim(),
                 event_description: document.getElementById('event-description').value.trim(),
                 event_date: document.getElementById('event-date').value,
-                event_time: document.getElementById('is-all-day').checked ? null : document.getElementById('event-time').value,
-                is_all_day: document.getElementById('is-all-day').checked
+                event_time: (isAllDay || !timeValue) ? null : timeValue,
+                is_all_day: isAllDay
             };
+
+            console.log('Saving event data:', eventData);
 
             try {
                 let response;
@@ -955,12 +960,14 @@
                     alert(currentEditingEventId ? '일정이 수정되었습니다.' : '일정이 추가되었습니다.');
                     closeEventModal();
                     await loadUserEvents();
+                    renderCalendar();
+                    displayEventsList();
                 } else {
                     alert('일정 저장에 실패했습니다.');
                 }
             } catch (error) {
                 console.error('Failed to save event:', error);
-                alert('일정 저장 중 오류가 발생했습니다.');
+                alert('일정 저장 중 오류가 발생했습니다: ' + error.message);
             }
         }
 
