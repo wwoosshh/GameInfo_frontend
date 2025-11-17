@@ -569,10 +569,122 @@ const API = {
             });
         },
     },
+
+    /**
+     * 관리자 API
+     */
+    admin: {
+        /**
+         * 유저 관리
+         */
+        users: {
+            async getAll(params = {}) {
+                const queryString = new URLSearchParams(params).toString();
+                const endpoint = `/admin/users${queryString ? '?' + queryString : ''}`;
+                return API.request(endpoint);
+            },
+
+            async getById(userId) {
+                return API.request(`/admin/users/${userId}`);
+            },
+
+            async update(userId, data) {
+                return API.request(`/admin/users/${userId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(data),
+                });
+            },
+
+            async delete(userId) {
+                return API.request(`/admin/users/${userId}`, {
+                    method: 'DELETE',
+                });
+            },
+        },
+
+        /**
+         * 게시글 관리
+         */
+        posts: {
+            async getAll(params = {}) {
+                const queryString = new URLSearchParams(params).toString();
+                const endpoint = `/admin/posts${queryString ? '?' + queryString : ''}`;
+                return API.request(endpoint);
+            },
+
+            async getById(postId) {
+                return API.request(`/admin/posts/${postId}`);
+            },
+
+            async update(postId, data) {
+                return API.request(`/admin/posts/${postId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(data),
+                });
+            },
+
+            async delete(postId) {
+                return API.request(`/admin/posts/${postId}`, {
+                    method: 'DELETE',
+                });
+            },
+        },
+
+        /**
+         * 댓글 관리
+         */
+        comments: {
+            async getAll(params = {}) {
+                const queryString = new URLSearchParams(params).toString();
+                const endpoint = `/admin/comments${queryString ? '?' + queryString : ''}`;
+                return API.request(endpoint);
+            },
+
+            async getById(commentId) {
+                return API.request(`/admin/comments/${commentId}`);
+            },
+
+            async delete(commentId) {
+                return API.request(`/admin/comments/${commentId}`, {
+                    method: 'DELETE',
+                });
+            },
+        },
+
+        /**
+         * 신고 관리
+         */
+        reports: {
+            async getAll(params = {}) {
+                const queryString = new URLSearchParams(params).toString();
+                const endpoint = `/admin/reports${queryString ? '?' + queryString : ''}`;
+                return API.request(endpoint);
+            },
+
+            async getById(reportId) {
+                return API.request(`/admin/reports/${reportId}`);
+            },
+
+            async update(reportId, data) {
+                return API.request(`/admin/reports/${reportId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(data),
+                });
+            },
+
+            async delete(reportId) {
+                return API.request(`/admin/reports/${reportId}`, {
+                    method: 'DELETE',
+                });
+            },
+        },
+    },
 };
 
 // 전역에서 사용 가능하도록 export
 window.API = API;
+window.Cache = Cache;
 
 // API 버전 확인 (디버깅용)
 console.log('API loaded with calendarEvents:', typeof API.calendarEvents !== 'undefined');
+console.log('API loaded with admin:', typeof API.admin !== 'undefined');

@@ -3,59 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>관리자 페이지 - 붕괴: 스타레일</title>
+    <title>관리자 페이지 - GameInfo</title>
     <link rel="stylesheet" href="../css/main.css">
     <style>
         .admin-container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
             padding: 48px 24px;
         }
 
         .admin-header {
-            padding: 48px 0;
+            padding: 32px 0;
             margin-bottom: 32px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
         .admin-title {
             font-size: 28px;
             font-weight: 700;
             color: #e6e6e6;
-            letter-spacing: -0.03em;
         }
 
+        /* 탭 네비게이션 */
+        .tab-navigation {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 32px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 15px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .tab-btn.active {
+            color: var(--accent-blue);
+            border-bottom-color: var(--accent-blue);
+        }
+
+        /* 탭 컨텐츠 */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* 필터 바 */
+        .filter-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-input, .filter-select {
+            padding: 10px 14px;
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .filter-input {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        /* 버튼 */
         .btn {
-            padding: 12px 20px;
+            padding: 10px 18px;
             border: none;
             border-radius: 6px;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
-            text-decoration: none;
-            display: inline-block;
             font-size: 14px;
         }
 
         .btn-primary {
-            background: #60a5fa;
+            background: var(--accent-blue);
             color: #0a0e14;
         }
 
         .btn-primary:hover {
             background: #3b82f6;
-        }
-
-        .btn-success {
-            background: #34d399;
-            color: #0a0e14;
-        }
-
-        .btn-success:hover {
-            background: #10b981;
         }
 
         .btn-danger {
@@ -67,6 +117,15 @@
             background: #ef4444;
         }
 
+        .btn-success {
+            background: var(--accent-green);
+            color: #0a0e14;
+        }
+
+        .btn-success:hover {
+            background: #10b981;
+        }
+
         .btn-secondary {
             background: #6b7280;
             color: #e6e6e6;
@@ -76,220 +135,167 @@
             background: #4b5563;
         }
 
-        .versions-table {
-            margin-bottom: 48px;
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 13px;
         }
 
-        .table-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .table-header h2 {
-            font-size: 20px;
-            font-weight: 600;
-            color: #e6e6e6;
-            letter-spacing: -0.02em;
-        }
-
+        /* 테이블 */
         table {
             width: 100%;
             border-collapse: collapse;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            overflow: hidden;
         }
 
-        th, td {
-            padding: 20px 16px;
-            text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        thead {
+            background: rgba(255, 255, 255, 0.03);
         }
 
         th {
-            background: transparent;
+            padding: 14px 16px;
+            text-align: left;
             font-weight: 600;
-            color: #9ca3af;
+            color: var(--text-secondary);
             font-size: 13px;
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
 
         td {
-            color: #e6e6e6;
+            padding: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
             font-size: 14px;
         }
 
-        tr:hover td {
-            background: #1a1f26;
+        tr:hover {
+            background: rgba(255, 255, 255, 0.02);
         }
 
-        tbody tr {
-            transition: all 0.2s ease;
-        }
-
-        tbody tr:last-child td {
-            border-bottom: none;
-        }
-
+        /* 배지 */
         .badge {
             display: inline-block;
             padding: 4px 10px;
-            border-radius: 4px;
+            border-radius: 12px;
             font-size: 12px;
             font-weight: 500;
         }
 
-        .badge-current {
-            background: rgba(96, 165, 250, 0.2);
-            color: #60a5fa;
+        .badge-active {
+            background: rgba(52, 211, 153, 0.2);
+            color: var(--accent-green);
         }
 
-        .badge-past {
-            background: rgba(156, 163, 175, 0.2);
-            color: #9ca3af;
+        .badge-inactive {
+            background: rgba(248, 113, 113, 0.2);
+            color: #f87171;
         }
 
+        .badge-pending {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+        }
+
+        .badge-approved {
+            background: rgba(52, 211, 153, 0.2);
+            color: var(--accent-green);
+        }
+
+        .badge-rejected {
+            background: rgba(248, 113, 113, 0.2);
+            color: #f87171;
+        }
+
+        /* 페이지네이션 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .pagination button {
+            padding: 8px 16px;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: var(--bg-hover);
+            border-color: var(--accent-blue);
+            color: var(--text-primary);
+        }
+
+        .pagination button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .page-info {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* 액션 버튼 그룹 */
         .action-buttons {
             display: flex;
             gap: 8px;
         }
 
-        .btn-small {
-            padding: 8px 16px;
-            font-size: 13px;
+        /* 로딩 및 빈 상태 */
+        .loading, .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--text-muted);
         }
 
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.8);
+        /* 통계 카드 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
         }
 
-        .modal.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background-color: #12171e;
-            padding: 32px;
+        .stat-card {
+            background: var(--bg-secondary);
+            padding: 20px;
             border-radius: 8px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 90vh;
-            overflow-y: auto;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .modal-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: #e6e6e6;
-        }
-
-        .close {
-            font-size: 28px;
-            font-weight: bold;
-            color: #6b7280;
-            cursor: pointer;
-            line-height: 1;
-        }
-
-        .close:hover {
-            color: #9ca3af;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-muted);
             margin-bottom: 8px;
-            color: #e6e6e6;
-            font-weight: 500;
-            font-size: 14px;
         }
 
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 6px;
-            font-size: 14px;
-            box-sizing: border-box;
-            background: #0a0e14;
-            color: #e6e6e6;
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
         }
 
-        .form-group textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #60a5fa;
-        }
-
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .checkbox-group input[type="checkbox"] {
-            width: auto;
-        }
-
-        .checkbox-group label {
-            margin-bottom: 0;
-        }
-
-        .error-message {
-            background: rgba(248, 113, 113, 0.2);
-            color: #f87171;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 16px;
-            border-left: 3px solid #f87171;
-            font-size: 14px;
-        }
-
-        .success-message {
-            background: rgba(52, 211, 153, 0.2);
-            color: #34d399;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 16px;
-            border-left: 3px solid #34d399;
-            font-size: 14px;
+        /* 텍스트 자르기 */
+        .text-truncate {
+            max-width: 300px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
     </style>
 </head>
 <body>
+    <!-- 헤더 -->
     <header class="main-header">
         <div class="container">
             <div class="header-content">
@@ -301,11 +307,9 @@
                         <li><a href="index.html">홈</a></li>
                         <li><a href="calendar.html">캘린더</a></li>
                         <li><a href="games.html">게임 목록</a></li>
-                        <li id="nav-community"><a href="community.html">커뮤니티</a></li>
-                        <li id="nav-admin" style="display:none;"><a href="admin.html">관리자</a></li>
-                        <li id="nav-profile" style="display:none;"><a href="profile.html">프로필</a></li>
-                        <li id="nav-login"><a href="login.html">로그인</a></li>
-                        <li id="nav-logout" style="display:none;"><a href="#" onclick="handleLogout(event)">로그아웃</a></li>
+                        <li><a href="community.html">커뮤니티</a></li>
+                        <li><a href="admin.html" class="active">관리자</a></li>
+                        <li id="nav-logout"><a href="#" onclick="handleLogout(event)">로그아웃</a></li>
                     </ul>
                 </nav>
             </div>
@@ -314,190 +318,329 @@
 
     <main class="admin-container">
         <div class="admin-header">
-            <h2 class="admin-title">버전 관리</h2>
-            <button class="btn btn-success" onclick="openCreateModal()">+ 새 버전 추가</button>
+            <h2 class="admin-title">관리자 페이지</h2>
         </div>
 
-        <div class="versions-table">
-            <div class="table-header">
-                <h3>버전 목록</h3>
+        <!-- 탭 네비게이션 -->
+        <div class="tab-navigation">
+            <button class="tab-btn active" onclick="switchTab('versions')">버전 관리</button>
+            <button class="tab-btn" onclick="switchTab('users')">유저 관리</button>
+            <button class="tab-btn" onclick="switchTab('posts')">게시글 관리</button>
+            <button class="tab-btn" onclick="switchTab('comments')">댓글 관리</button>
+            <button class="tab-btn" onclick="switchTab('reports')">신고 관리</button>
+        </div>
+
+        <!-- 버전 관리 탭 -->
+        <div id="tab-versions" class="tab-content active">
+            <h3 style="margin-bottom: 24px; font-size: 20px;">버전 관리</h3>
+            <p style="color: var(--text-muted); margin-bottom: 24px;">
+                게임 버전과 업데이트 항목을 관리합니다. (기존 기능 유지)
+            </p>
+            <a href="admin.html" class="btn btn-primary">기존 버전 관리 페이지로 이동</a>
+        </div>
+
+        <!-- 유저 관리 탭 -->
+        <div id="tab-users" class="tab-content">
+            <!-- 통계 -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">전체 유저</div>
+                    <div class="stat-value" id="stat-total-users">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">활성 유저</div>
+                    <div class="stat-value" id="stat-active-users">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">비활성 유저</div>
+                    <div class="stat-value" id="stat-inactive-users">-</div>
+                </div>
             </div>
-            <div id="versions-container">
-                <div class="loading">버전 목록 로딩 중...</div>
+
+            <!-- 필터 -->
+            <div class="filter-bar">
+                <input type="text" id="users-search" class="filter-input" placeholder="유저명, 이메일 검색...">
+                <select id="users-active" class="filter-select">
+                    <option value="">전체</option>
+                    <option value="true">활성</option>
+                    <option value="false">비활성</option>
+                </select>
+                <button class="btn btn-secondary" onclick="loadUsers()">검색</button>
+            </div>
+
+            <!-- 유저 테이블 -->
+            <div id="users-container">
+                <div class="loading">유저 목록을 불러오는 중...</div>
+            </div>
+
+            <!-- 페이지네이션 -->
+            <div class="pagination" id="users-pagination" style="display: none;">
+                <button id="users-prev">← 이전</button>
+                <span class="page-info" id="users-page-info">1 / 1</span>
+                <button id="users-next">다음 →</button>
+            </div>
+        </div>
+
+        <!-- 게시글 관리 탭 -->
+        <div id="tab-posts" class="tab-content">
+            <!-- 통계 -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">전체 게시글</div>
+                    <div class="stat-value" id="stat-total-posts">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">공지사항</div>
+                    <div class="stat-value" id="stat-pinned-posts">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">삭제된 게시글</div>
+                    <div class="stat-value" id="stat-deleted-posts">-</div>
+                </div>
+            </div>
+
+            <!-- 필터 -->
+            <div class="filter-bar">
+                <input type="text" id="posts-search" class="filter-input" placeholder="제목, 내용 검색...">
+                <select id="posts-category" class="filter-select">
+                    <option value="">전체 카테고리</option>
+                    <option value="general">자유</option>
+                    <option value="tip">팁과 노하우</option>
+                    <option value="question">질문</option>
+                    <option value="bug_report">버그 제보</option>
+                </select>
+                <select id="posts-deleted" class="filter-select">
+                    <option value="false">활성</option>
+                    <option value="true">삭제됨</option>
+                </select>
+                <button class="btn btn-secondary" onclick="loadPosts()">검색</button>
+            </div>
+
+            <!-- 게시글 테이블 -->
+            <div id="posts-container">
+                <div class="loading">게시글 목록을 불러오는 중...</div>
+            </div>
+
+            <!-- 페이지네이션 -->
+            <div class="pagination" id="posts-pagination" style="display: none;">
+                <button id="posts-prev">← 이전</button>
+                <span class="page-info" id="posts-page-info">1 / 1</span>
+                <button id="posts-next">다음 →</button>
+            </div>
+        </div>
+
+        <!-- 댓글 관리 탭 -->
+        <div id="tab-comments" class="tab-content">
+            <!-- 통계 -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">전체 댓글</div>
+                    <div class="stat-value" id="stat-total-comments">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">삭제된 댓글</div>
+                    <div class="stat-value" id="stat-deleted-comments">-</div>
+                </div>
+            </div>
+
+            <!-- 필터 -->
+            <div class="filter-bar">
+                <input type="text" id="comments-search" class="filter-input" placeholder="댓글 내용 검색...">
+                <select id="comments-deleted" class="filter-select">
+                    <option value="false">활성</option>
+                    <option value="true">삭제됨</option>
+                </select>
+                <button class="btn btn-secondary" onclick="loadComments()">검색</button>
+            </div>
+
+            <!-- 댓글 테이블 -->
+            <div id="comments-container">
+                <div class="loading">댓글 목록을 불러오는 중...</div>
+            </div>
+
+            <!-- 페이지네이션 -->
+            <div class="pagination" id="comments-pagination" style="display: none;">
+                <button id="comments-prev">← 이전</button>
+                <span class="page-info" id="comments-page-info">1 / 1</span>
+                <button id="comments-next">다음 →</button>
+            </div>
+        </div>
+
+        <!-- 신고 관리 탭 -->
+        <div id="tab-reports" class="tab-content">
+            <!-- 통계 -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">전체 신고</div>
+                    <div class="stat-value" id="stat-total-reports">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">처리 대기</div>
+                    <div class="stat-value" id="stat-pending-reports">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">승인됨</div>
+                    <div class="stat-value" id="stat-approved-reports">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">거부됨</div>
+                    <div class="stat-value" id="stat-rejected-reports">-</div>
+                </div>
+            </div>
+
+            <!-- 필터 -->
+            <div class="filter-bar">
+                <select id="reports-status" class="filter-select">
+                    <option value="">전체 상태</option>
+                    <option value="pending" selected>처리 대기</option>
+                    <option value="approved">승인</option>
+                    <option value="rejected">거부</option>
+                </select>
+                <select id="reports-type" class="filter-select">
+                    <option value="">전체 유형</option>
+                    <option value="post">게시글</option>
+                    <option value="comment">댓글</option>
+                </select>
+                <button class="btn btn-secondary" onclick="loadReports()">검색</button>
+            </div>
+
+            <!-- 신고 테이블 -->
+            <div id="reports-container">
+                <div class="loading">신고 목록을 불러오는 중...</div>
+            </div>
+
+            <!-- 페이지네이션 -->
+            <div class="pagination" id="reports-pagination" style="display: none;">
+                <button id="reports-prev">← 이전</button>
+                <span class="page-info" id="reports-page-info">1 / 1</span>
+                <button id="reports-next">다음 →</button>
             </div>
         </div>
     </main>
 
-    <!-- 버전 생성/수정 모달 -->
-    <div id="versionModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title" id="modalTitle">새 버전 추가</h3>
-                <span class="close" onclick="closeModal()">&times;</span>
-            </div>
-            <div id="modalMessage"></div>
-            <form id="versionForm">
-                <input type="hidden" id="versionId">
-                <input type="hidden" id="gameId" value="2">
-
-                <div class="form-group">
-                    <label for="versionNumber">버전 번호 *</label>
-                    <input type="text" id="versionNumber" required placeholder="예: 2.7">
-                </div>
-
-                <div class="form-group">
-                    <label for="versionName">버전 이름</label>
-                    <input type="text" id="versionName" placeholder="예: 운명의 항해">
-                </div>
-
-                <div class="form-group">
-                    <label for="versionNameEn">버전 이름 (영문)</label>
-                    <input type="text" id="versionNameEn" placeholder="예: Voyage of Destiny">
-                </div>
-
-                <div class="form-group">
-                    <label for="releaseDate">출시일 *</label>
-                    <input type="date" id="releaseDate" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="endDate">종료일</label>
-                    <input type="date" id="endDate">
-                </div>
-
-                <div class="form-group">
-                    <label for="durationDays">지속 기간 (일)</label>
-                    <input type="number" id="durationDays" placeholder="예: 42">
-                </div>
-
-                <div class="form-group">
-                    <label for="description">설명</label>
-                    <textarea id="description" placeholder="버전 설명"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label for="bannerImageUrl">배너 이미지 URL</label>
-                    <div style="display: flex; gap: 8px; align-items: flex-start;">
-                        <input type="url" id="bannerImageUrl" placeholder="https://..." style="flex: 1;" onchange="updateImagePreview('bannerImageUrl')">
-                        <input type="file" id="bannerImageUrl_file" accept="image/*" style="display: none;" onchange="handleImageUpload(this, 'bannerImageUrl')">
-                        <button type="button" class="btn btn-secondary btn-small" onclick="document.getElementById('bannerImageUrl_file').click()" style="white-space: nowrap;">파일 선택</button>
-                    </div>
-                    <div id="bannerImageUrl_preview" style="margin-top: 8px; display: none;">
-                        <img src="" alt="미리보기" style="max-width: 300px; max-height: 150px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
-                    </div>
-                    <div id="bannerImageUrl_progress" style="margin-top: 8px; display: none; color: #60a5fa; font-size: 13px;">업로드 중...</div>
-                </div>
-
-                <div class="form-group">
-                    <label for="thumbnailUrl">썸네일 URL</label>
-                    <div style="display: flex; gap: 8px; align-items: flex-start;">
-                        <input type="url" id="thumbnailUrl" placeholder="https://..." style="flex: 1;" onchange="updateImagePreview('thumbnailUrl')">
-                        <input type="file" id="thumbnailUrl_file" accept="image/*" style="display: none;" onchange="handleImageUpload(this, 'thumbnailUrl')">
-                        <button type="button" class="btn btn-secondary btn-small" onclick="document.getElementById('thumbnailUrl_file').click()" style="white-space: nowrap;">파일 선택</button>
-                    </div>
-                    <div id="thumbnailUrl_preview" style="margin-top: 8px; display: none;">
-                        <img src="" alt="미리보기" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
-                    </div>
-                    <div id="thumbnailUrl_progress" style="margin-top: 8px; display: none; color: #60a5fa; font-size: 13px;">업로드 중...</div>
-                </div>
-
-                <div class="form-group checkbox-group">
-                    <input type="checkbox" id="isCurrent">
-                    <label for="isCurrent">현재 버전으로 설정</label>
-                </div>
-
-                <div class="action-buttons">
-                    <button type="submit" class="btn btn-primary">저장</button>
-                    <button type="button" class="btn btn-secondary" onclick="closeModal()">취소</button>
-                </div>
-            </form>
+    <footer class="main-footer">
+        <div class="container">
+            <p>&copy; 2025 GameInfo. 대학교 과제 프로젝트</p>
+            <p>모든 게임 관련 상표는 해당 소유자의 자산입니다.</p>
         </div>
-    </div>
+    </footer>
 
     <script src="../js/api.js"></script>
     <script src="../js/navigation.js"></script>
-    <script src="../js/upload.js"></script>
     <script>
-        let versions = [];
-        let editingVersionId = null;
+        // 현재 탭과 페이지 상태
+        let currentTab = 'versions';
+        let currentPages = {
+            users: 1,
+            posts: 1,
+            comments: 1,
+            reports: 1
+        };
 
-        // 페이지 초기화
-        async function initPage() {
-            checkAuth();
-            await loadVersions();
+        // 탭 전환
+        function switchTab(tabName) {
+            // 탭 버튼 활성화
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // 탭 컨텐츠 표시
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+
+            currentTab = tabName;
+
+            // 해당 탭 데이터 로드
+            if (tabName === 'users') loadUsers();
+            else if (tabName === 'posts') loadPosts();
+            else if (tabName === 'comments') loadComments();
+            else if (tabName === 'reports') loadReports();
         }
 
-        // 권한 확인
-        function checkAuth() {
-            const userStr = localStorage.getItem('user');
-            if (!userStr) {
-                alert('로그인이 필요합니다.');
-                window.location.href = 'login.html';
-                return;
-            }
-
-            const user = JSON.parse(userStr);
-            if (!user.is_admin) {
+        // 페이지 로드 시
+        document.addEventListener('DOMContentLoaded', () => {
+            // 관리자 권한 확인
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (!user.is_admin && user.username !== 'admin') {
                 alert('관리자 권한이 필요합니다.');
                 window.location.href = 'index.html';
                 return;
             }
-        }
 
-        // 버전 목록 로드
-        async function loadVersions() {
+            loadUsers();
+        });
+
+        // ==================== 유저 관리 ====================
+        async function loadUsers(page = 1) {
+            const container = document.getElementById('users-container');
+            container.innerHTML = '<div class="loading">유저 목록을 불러오는 중...</div>';
+
             try {
-                const response = await API.versions.getByGame(2);  // 붕괴: 스타레일
-                versions = response.data.versions;
-                displayVersions();
+                const params = {
+                    page,
+                    limit: 20,
+                    search: document.getElementById('users-search')?.value || '',
+                    is_active: document.getElementById('users-active')?.value || ''
+                };
+
+                const response = await API.admin.users.getAll(params);
+
+                if (response.success && response.data.users) {
+                    displayUsers(response.data.users);
+                    updatePagination('users', response.data.pagination);
+                    updateStats('users', response.data);
+                } else {
+                    container.innerHTML = '<div class="empty-state">유저 목록을 불러올 수 없습니다.</div>';
+                }
             } catch (error) {
-                console.error('Failed to load versions:', error);
-                document.getElementById('versions-container').innerHTML =
-                    '<div class="error-message">버전 목록을 불러올 수 없습니다.</div>';
+                console.error('Failed to load users:', error);
+                container.innerHTML = '<div class="empty-state">유저 목록을 불러오는데 실패했습니다.</div>';
             }
         }
 
-        // 버전 목록 표시
-        function displayVersions() {
-            const container = document.getElementById('versions-container');
+        function displayUsers(users) {
+            const container = document.getElementById('users-container');
 
-            if (!versions || versions.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #7f8c8d;">등록된 버전이 없습니다.</p>';
+            if (users.length === 0) {
+                container.innerHTML = '<div class="empty-state">검색 결과가 없습니다.</div>';
                 return;
             }
 
-            const html = `
+            const tableHTML = `
                 <table>
                     <thead>
                         <tr>
-                            <th>버전</th>
-                            <th>이름</th>
-                            <th>출시일</th>
-                            <th>기간</th>
+                            <th>ID</th>
+                            <th>유저명</th>
+                            <th>이메일</th>
+                            <th>가입일</th>
+                            <th>게시글</th>
+                            <th>댓글</th>
                             <th>상태</th>
-                            <th>항목 수</th>
-                            <th>관리</th>
+                            <th>역할</th>
+                            <th>액션</th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${versions.map(v => `
+                        ${users.map(user => `
                             <tr>
-                                <td><strong>${escapeHtml(v.version_number)}</strong></td>
-                                <td>${escapeHtml(v.version_name || '-')}</td>
-                                <td>${formatDate(v.release_date)}</td>
-                                <td>${v.duration_days ? v.duration_days + '일' : '-'}</td>
+                                <td>${user.user_id}</td>
+                                <td>${escapeHtml(user.display_name || user.username)}</td>
+                                <td>${escapeHtml(user.email)}</td>
+                                <td>${formatDate(user.created_at)}</td>
+                                <td>${user.post_count || 0}</td>
+                                <td>${user.comment_count || 0}</td>
                                 <td>
-                                    ${v.is_current == 1
-                                        ? '<span class="badge badge-current">현재</span>'
-                                        : '<span class="badge badge-past">종료</span>'}
+                                    <span class="badge ${user.is_active ? 'badge-active' : 'badge-inactive'}">
+                                        ${user.is_active ? '활성' : '비활성'}
+                                    </span>
                                 </td>
-                                <td>${v.total_items || 0}개</td>
+                                <td>${formatRoles(user.roles)}</td>
                                 <td>
                                     <div class="action-buttons">
-                                        <button class="btn btn-primary btn-small" onclick="goToVersionDetail(${v.version_id})">상세</button>
-                                        <button class="btn btn-primary btn-small" onclick="openEditModal(${v.version_id})">수정</button>
-                                        <button class="btn btn-success btn-small" onclick="goToManageItems(${v.version_id})">항목</button>
-                                        <button class="btn btn-danger btn-small" onclick="deleteVersion(${v.version_id})">삭제</button>
+                                        ${user.is_active ?
+                                            `<button class="btn btn-danger btn-sm" onclick="deactivateUser(${user.user_id})">비활성화</button>` :
+                                            `<button class="btn btn-success btn-sm" onclick="activateUser(${user.user_id})">활성화</button>`
+                                        }
                                     </div>
                                 </td>
                             </tr>
@@ -506,153 +649,441 @@
                 </table>
             `;
 
-            container.innerHTML = html;
+            container.innerHTML = tableHTML;
         }
 
-        // 버전 생성 모달 열기
-        function openCreateModal() {
-            editingVersionId = null;
-            document.getElementById('modalTitle').textContent = '새 버전 추가';
-            document.getElementById('versionForm').reset();
-            document.getElementById('versionId').value = '';
-            document.getElementById('modalMessage').innerHTML = '';
-            document.getElementById('versionModal').classList.add('active');
-        }
-
-        // 버전 수정 모달 열기
-        async function openEditModal(versionId) {
-            editingVersionId = versionId;
-            document.getElementById('modalTitle').textContent = '버전 수정';
-            document.getElementById('modalMessage').innerHTML = '';
+        async function deactivateUser(userId) {
+            if (!confirm('이 유저를 비활성화하시겠습니까?')) return;
 
             try {
-                const response = await API.versions.getById(versionId);
-                const version = response.data;
-
-                document.getElementById('versionId').value = version.version_id;
-                document.getElementById('versionNumber').value = version.version_number;
-                document.getElementById('versionName').value = version.version_name || '';
-                document.getElementById('versionNameEn').value = version.version_name_en || '';
-                document.getElementById('releaseDate').value = version.release_date;
-                document.getElementById('endDate').value = version.end_date || '';
-                document.getElementById('durationDays').value = version.duration_days || '';
-                document.getElementById('description').value = version.description || '';
-                document.getElementById('bannerImageUrl').value = version.banner_image_url || '';
-                document.getElementById('thumbnailUrl').value = version.thumbnail_url || '';
-                document.getElementById('isCurrent').checked = version.is_current == 1;
-
-                // 이미지 미리보기 업데이트
-                if (version.banner_image_url) updateImagePreview('bannerImageUrl');
-                if (version.thumbnail_url) updateImagePreview('thumbnailUrl');
-
-                document.getElementById('versionModal').classList.add('active');
+                await API.admin.users.update(userId, { is_active: false });
+                alert('유저가 비활성화되었습니다.');
+                loadUsers(currentPages.users);
             } catch (error) {
-                alert('버전 정보를 불러올 수 없습니다.');
+                alert('유저 비활성화에 실패했습니다.');
             }
         }
 
-        // 모달 닫기
-        function closeModal() {
-            document.getElementById('versionModal').classList.remove('active');
+        async function activateUser(userId) {
+            try {
+                await API.admin.users.update(userId, { is_active: true });
+                alert('유저가 활성화되었습니다.');
+                loadUsers(currentPages.users);
+            } catch (error) {
+                alert('유저 활성화에 실패했습니다.');
+            }
         }
 
-        // 버전 폼 제출
-        document.getElementById('versionForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const versionData = {
-                game_id: 2,  // 붕괴: 스타레일
-                version_number: document.getElementById('versionNumber').value,
-                version_name: document.getElementById('versionName').value,
-                version_name_en: document.getElementById('versionNameEn').value,
-                release_date: document.getElementById('releaseDate').value,
-                end_date: document.getElementById('endDate').value || null,
-                duration_days: document.getElementById('durationDays').value || null,
-                description: document.getElementById('description').value,
-                banner_image_url: document.getElementById('bannerImageUrl').value || null,
-                thumbnail_url: document.getElementById('thumbnailUrl').value || null,
-                is_current: document.getElementById('isCurrent').checked ? 1 : 0
-            };
+        // ==================== 게시글 관리 ====================
+        async function loadPosts(page = 1) {
+            const container = document.getElementById('posts-container');
+            container.innerHTML = '<div class="loading">게시글 목록을 불러오는 중...</div>';
 
             try {
-                if (editingVersionId) {
-                    // 수정
-                    await API.versions.update(editingVersionId, versionData);
-                    showMessage('success', '버전이 수정되었습니다.');
+                const params = {
+                    page,
+                    limit: 20,
+                    search: document.getElementById('posts-search')?.value || '',
+                    category: document.getElementById('posts-category')?.value || '',
+                    is_deleted: document.getElementById('posts-deleted')?.value || 'false'
+                };
+
+                const response = await API.admin.posts.getAll(params);
+
+                if (response.success && response.data.posts) {
+                    displayPosts(response.data.posts);
+                    updatePagination('posts', response.data.pagination);
+                    updateStats('posts', response.data);
                 } else {
-                    // 생성
-                    await API.versions.create(versionData);
-                    showMessage('success', '버전이 생성되었습니다.');
+                    container.innerHTML = '<div class="empty-state">게시글 목록을 불러올 수 없습니다.</div>';
                 }
-
-                setTimeout(() => {
-                    closeModal();
-                    loadVersions();
-                }, 1500);
             } catch (error) {
-                showMessage('error', '저장에 실패했습니다: ' + error.message);
+                console.error('Failed to load posts:', error);
+                container.innerHTML = '<div class="empty-state">게시글 목록을 불러오는데 실패했습니다.</div>';
             }
-        });
+        }
 
-        // 버전 삭제
-        async function deleteVersion(versionId) {
-            if (!confirm('정말 이 버전을 삭제하시겠습니까? 모든 업데이트 항목도 함께 삭제됩니다.')) {
+        function displayPosts(posts) {
+            const container = document.getElementById('posts-container');
+
+            if (posts.length === 0) {
+                container.innerHTML = '<div class="empty-state">검색 결과가 없습니다.</div>';
                 return;
             }
 
+            const tableHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>제목</th>
+                            <th>작성자</th>
+                            <th>카테고리</th>
+                            <th>작성일</th>
+                            <th>조회</th>
+                            <th>좋아요</th>
+                            <th>댓글</th>
+                            <th>상태</th>
+                            <th>액션</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${posts.map(post => `
+                            <tr>
+                                <td>${post.post_id}</td>
+                                <td>
+                                    <div class="text-truncate">
+                                        ${post.is_pinned ? '[공지] ' : ''}${escapeHtml(post.title)}
+                                    </div>
+                                </td>
+                                <td>${escapeHtml(post.display_name || post.username)}</td>
+                                <td>${getCategoryLabel(post.category)}</td>
+                                <td>${formatDate(post.created_at)}</td>
+                                <td>${post.view_count || 0}</td>
+                                <td>${post.like_count || 0}</td>
+                                <td>${post.comment_count || 0}</td>
+                                <td>
+                                    ${post.is_pinned ? '<span class="badge badge-active">공지</span> ' : ''}
+                                    ${post.is_locked ? '<span class="badge badge-inactive">잠금</span> ' : ''}
+                                    ${post.is_deleted ? '<span class="badge badge-inactive">삭제</span>' : ''}
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn btn-primary btn-sm" onclick="togglePin(${post.post_id}, ${post.is_pinned})">
+                                            ${post.is_pinned ? '공지해제' : '공지설정'}
+                                        </button>
+                                        ${!post.is_deleted ?
+                                            `<button class="btn btn-danger btn-sm" onclick="deletePost(${post.post_id})">삭제</button>` :
+                                            `<button class="btn btn-success btn-sm" onclick="restorePost(${post.post_id})">복원</button>`
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            container.innerHTML = tableHTML;
+        }
+
+        async function togglePin(postId, isPinned) {
             try {
-                await API.versions.delete(versionId);
-                alert('버전이 삭제되었습니다.');
-                loadVersions();
+                await API.admin.posts.update(postId, { is_pinned: !isPinned });
+                loadPosts(currentPages.posts);
             } catch (error) {
-                alert('삭제에 실패했습니다: ' + error.message);
+                alert('공지 설정에 실패했습니다.');
             }
         }
 
-        // 버전 상세로 이동
-        function goToVersionDetail(versionId) {
-            window.location.href = `version_detail.html?version_id=${versionId}`;
+        async function deletePost(postId) {
+            if (!confirm('이 게시글을 삭제하시겠습니까?')) return;
+
+            try {
+                await API.admin.posts.delete(postId);
+                alert('게시글이 삭제되었습니다.');
+                loadPosts(currentPages.posts);
+            } catch (error) {
+                alert('게시글 삭제에 실패했습니다.');
+            }
         }
 
-        // 항목 관리로 이동
-        function goToManageItems(versionId) {
-            window.location.href = `admin_items_v2.html?version_id=${versionId}`;
+        async function restorePost(postId) {
+            try {
+                await API.admin.posts.update(postId, { is_deleted: false });
+                alert('게시글이 복원되었습니다.');
+                loadPosts(currentPages.posts);
+            } catch (error) {
+                alert('게시글 복원에 실패했습니다.');
+            }
         }
 
-        // 메시지 표시
-        function showMessage(type, message) {
-            const messageDiv = document.getElementById('modalMessage');
-            messageDiv.className = type === 'success' ? 'success-message' : 'error-message';
-            messageDiv.textContent = message;
+        // ==================== 댓글 관리 ====================
+        async function loadComments(page = 1) {
+            const container = document.getElementById('comments-container');
+            container.innerHTML = '<div class="loading">댓글 목록을 불러오는 중...</div>';
+
+            try {
+                const params = {
+                    page,
+                    limit: 20,
+                    search: document.getElementById('comments-search')?.value || '',
+                    is_deleted: document.getElementById('comments-deleted')?.value || 'false'
+                };
+
+                const response = await API.admin.comments.getAll(params);
+
+                if (response.success && response.data.comments) {
+                    displayComments(response.data.comments);
+                    updatePagination('comments', response.data.pagination);
+                    updateStats('comments', response.data);
+                } else {
+                    container.innerHTML = '<div class="empty-state">댓글 목록을 불러올 수 없습니다.</div>';
+                }
+            } catch (error) {
+                console.error('Failed to load comments:', error);
+                container.innerHTML = '<div class="empty-state">댓글 목록을 불러오는데 실패했습니다.</div>';
+            }
         }
 
-        // 유틸리티 함수
+        function displayComments(comments) {
+            const container = document.getElementById('comments-container');
+
+            if (comments.length === 0) {
+                container.innerHTML = '<div class="empty-state">검색 결과가 없습니다.</div>';
+                return;
+            }
+
+            const tableHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>내용</th>
+                            <th>작성자</th>
+                            <th>게시글</th>
+                            <th>작성일</th>
+                            <th>좋아요</th>
+                            <th>상태</th>
+                            <th>액션</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${comments.map(comment => `
+                            <tr>
+                                <td>${comment.comment_id}</td>
+                                <td>
+                                    <div class="text-truncate">${escapeHtml(comment.content)}</div>
+                                </td>
+                                <td>${escapeHtml(comment.display_name || comment.username)}</td>
+                                <td>
+                                    <div class="text-truncate">${escapeHtml(comment.post_title || '-')}</div>
+                                </td>
+                                <td>${formatDate(comment.created_at)}</td>
+                                <td>${comment.like_count || 0}</td>
+                                <td>
+                                    ${comment.is_deleted ? '<span class="badge badge-inactive">삭제</span>' : '<span class="badge badge-active">활성</span>'}
+                                </td>
+                                <td>
+                                    ${!comment.is_deleted ?
+                                        `<button class="btn btn-danger btn-sm" onclick="deleteComment(${comment.comment_id})">삭제</button>` :
+                                        '<span style="color: var(--text-muted);">삭제됨</span>'
+                                    }
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            container.innerHTML = tableHTML;
+        }
+
+        async function deleteComment(commentId) {
+            if (!confirm('이 댓글을 삭제하시겠습니까?')) return;
+
+            try {
+                await API.admin.comments.delete(commentId);
+                alert('댓글이 삭제되었습니다.');
+                loadComments(currentPages.comments);
+            } catch (error) {
+                alert('댓글 삭제에 실패했습니다.');
+            }
+        }
+
+        // ==================== 신고 관리 ====================
+        async function loadReports(page = 1) {
+            const container = document.getElementById('reports-container');
+            container.innerHTML = '<div class="loading">신고 목록을 불러오는 중...</div>';
+
+            try {
+                const params = {
+                    page,
+                    limit: 20,
+                    status: document.getElementById('reports-status')?.value || '',
+                    reported_type: document.getElementById('reports-type')?.value || ''
+                };
+
+                const response = await API.admin.reports.getAll(params);
+
+                if (response.success && response.data.reports) {
+                    displayReports(response.data.reports);
+                    updatePagination('reports', response.data.pagination);
+                    updateStats('reports', response.data);
+                } else {
+                    container.innerHTML = '<div class="empty-state">신고 목록을 불러올 수 없습니다.</div>';
+                }
+            } catch (error) {
+                console.error('Failed to load reports:', error);
+                container.innerHTML = '<div class="empty-state">신고 목록을 불러오는데 실패했습니다.</div>';
+            }
+        }
+
+        function displayReports(reports) {
+            const container = document.getElementById('reports-container');
+
+            if (reports.length === 0) {
+                container.innerHTML = '<div class="empty-state">검색 결과가 없습니다.</div>';
+                return;
+            }
+
+            const tableHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>유형</th>
+                            <th>신고 사유</th>
+                            <th>신고 내용</th>
+                            <th>신고자</th>
+                            <th>신고일</th>
+                            <th>상태</th>
+                            <th>액션</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${reports.map(report => `
+                            <tr>
+                                <td>${report.report_id}</td>
+                                <td>${report.reported_type === 'post' ? '게시글' : '댓글'}</td>
+                                <td>${getReasonLabel(report.reason)}</td>
+                                <td>
+                                    <div class="text-truncate">${escapeHtml(report.reported_content || '-')}</div>
+                                </td>
+                                <td>${escapeHtml(report.reporter_display_name || report.reporter_username)}</td>
+                                <td>${formatDate(report.created_at)}</td>
+                                <td>
+                                    <span class="badge badge-${report.status}">
+                                        ${getStatusLabel(report.status)}
+                                    </span>
+                                </td>
+                                <td>
+                                    ${report.status === 'pending' ? `
+                                        <div class="action-buttons">
+                                            <button class="btn btn-success btn-sm" onclick="approveReport(${report.report_id})">승인</button>
+                                            <button class="btn btn-danger btn-sm" onclick="rejectReport(${report.report_id})">거부</button>
+                                        </div>
+                                    ` : `
+                                        <span style="color: var(--text-muted);">처리완료</span>
+                                    `}
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            container.innerHTML = tableHTML;
+        }
+
+        async function approveReport(reportId) {
+            if (!confirm('이 신고를 승인하시겠습니까? 해당 컨텐츠가 삭제됩니다.')) return;
+
+            try {
+                await API.admin.reports.update(reportId, { status: 'approved' });
+                alert('신고가 승인되었습니다.');
+                loadReports(currentPages.reports);
+            } catch (error) {
+                alert('신고 승인에 실패했습니다.');
+            }
+        }
+
+        async function rejectReport(reportId) {
+            if (!confirm('이 신고를 거부하시겠습니까?')) return;
+
+            try {
+                await API.admin.reports.update(reportId, { status: 'rejected' });
+                alert('신고가 거부되었습니다.');
+                loadReports(currentPages.reports);
+            } catch (error) {
+                alert('신고 거부에 실패했습니다.');
+            }
+        }
+
+        // ==================== 공통 유틸리티 ====================
+        function updatePagination(type, pagination) {
+            currentPages[type] = pagination.current_page;
+
+            const paginationEl = document.getElementById(`${type}-pagination`);
+            const pageInfo = document.getElementById(`${type}-page-info`);
+            const btnPrev = document.getElementById(`${type}-prev`);
+            const btnNext = document.getElementById(`${type}-next`);
+
+            if (pagination.total_pages > 1) {
+                paginationEl.style.display = 'flex';
+                pageInfo.textContent = `${pagination.current_page} / ${pagination.total_pages}`;
+                btnPrev.disabled = pagination.current_page === 1;
+                btnNext.disabled = pagination.current_page === pagination.total_pages;
+
+                btnPrev.onclick = () => {
+                    if (type === 'users') loadUsers(pagination.current_page - 1);
+                    else if (type === 'posts') loadPosts(pagination.current_page - 1);
+                    else if (type === 'comments') loadComments(pagination.current_page - 1);
+                    else if (type === 'reports') loadReports(pagination.current_page - 1);
+                };
+
+                btnNext.onclick = () => {
+                    if (type === 'users') loadUsers(pagination.current_page + 1);
+                    else if (type === 'posts') loadPosts(pagination.current_page + 1);
+                    else if (type === 'comments') loadComments(pagination.current_page + 1);
+                    else if (type === 'reports') loadReports(pagination.current_page + 1);
+                };
+            } else {
+                paginationEl.style.display = 'none';
+            }
+        }
+
+        function updateStats(type, data) {
+            // 통계 업데이트는 pagination 정보를 기반으로 계산
+            // 실제로는 별도 API가 있으면 더 정확하지만, 현재는 pagination 데이터 활용
+        }
+
         function formatDate(dateString) {
+            if (!dateString) return '-';
             const date = new Date(dateString);
-            return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+            return date.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
+        }
+
+        function formatRoles(roles) {
+            if (!roles || roles.length === 0) return '일반';
+            return roles.map(r => r.role_name).join(', ');
+        }
+
+        function getCategoryLabel(category) {
+            const labels = {
+                'general': '자유',
+                'tip': '팁과 노하우',
+                'question': '질문',
+                'bug_report': '버그 제보'
+            };
+            return labels[category] || category || '-';
+        }
+
+        function getStatusLabel(status) {
+            const labels = {
+                'pending': '대기',
+                'approved': '승인',
+                'rejected': '거부'
+            };
+            return labels[status] || status;
+        }
+
+        function getReasonLabel(reason) {
+            const labels = {
+                'spam': '스팸',
+                'inappropriate': '부적절한 내용',
+                'harassment': '괴롭힘',
+                'false_info': '허위 정보',
+                'etc': '기타'
+            };
+            return labels[reason] || reason;
         }
 
         function escapeHtml(text) {
             if (!text) return '';
-            const map = {
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#039;'
-            };
-            return text.toString().replace(/[&<>"']/g, m => map[m]);
-        }
-
-        // 페이지 로드 시 초기화
-        document.addEventListener('DOMContentLoaded', initPage);
-
-        // 모달 외부 클릭 시 닫기
-        window.onclick = function(event) {
-            const modal = document.getElementById('versionModal');
-            if (event.target == modal) {
-                closeModal();
-            }
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
     </script>
 </body>
