@@ -390,7 +390,7 @@
                     <div class="stat-value" id="stat-total-posts">-</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">공지사항</div>
+                    <div class="stat-label">핀 고정된 게시글</div>
                     <div class="stat-value" id="stat-pinned-posts">-</div>
                 </div>
                 <div class="stat-card">
@@ -492,7 +492,7 @@
             <div class="filter-bar">
                 <select id="reports-status" class="filter-select">
                     <option value="">전체 상태</option>
-                    <option value="pending" selected>처리 대기</option>
+                    <option value="pending">처리 대기</option>
                     <option value="approved">승인</option>
                     <option value="rejected">거부</option>
                 </select>
@@ -769,7 +769,7 @@
                                 <td>${post.post_id}</td>
                                 <td>
                                     <div class="text-truncate">
-                                        ${post.is_pinned ? '[공지] ' : ''}${escapeHtml(post.title)}
+                                        ${post.is_pinned ? '[핀] ' : ''}${escapeHtml(post.title)}
                                     </div>
                                 </td>
                                 <td>${escapeHtml(post.display_name || post.username)}</td>
@@ -779,14 +779,14 @@
                                 <td>${post.like_count || 0}</td>
                                 <td>${post.comment_count || 0}</td>
                                 <td>
-                                    ${post.is_pinned ? '<span class="badge badge-active">공지</span> ' : ''}
+                                    ${post.is_pinned ? '<span class="badge badge-active">핀</span> ' : ''}
                                     ${post.is_locked ? '<span class="badge badge-inactive">잠금</span> ' : ''}
                                     ${post.is_deleted ? '<span class="badge badge-inactive">삭제</span>' : ''}
                                 </td>
                                 <td>
                                     <div class="action-buttons">
                                         <button class="btn btn-primary btn-sm" onclick="togglePin(${post.post_id}, ${post.is_pinned})">
-                                            ${post.is_pinned ? '공지해제' : '공지설정'}
+                                            ${post.is_pinned ? '핀 해제' : '핀 고정'}
                                         </button>
                                         ${!post.is_deleted ?
                                             `<button class="btn btn-danger btn-sm" onclick="deletePost(${post.post_id})">삭제</button>` :
@@ -1088,8 +1088,78 @@
         }
 
         function updateStats(type, data) {
-            // 통계 업데이트는 pagination 정보를 기반으로 계산
-            // 실제로는 별도 API가 있으면 더 정확하지만, 현재는 pagination 데이터 활용
+            if (type === 'users') {
+                const total = data.pagination.total_items;
+                document.getElementById('stat-total-users').textContent = total;
+
+                // 활성/비활성 유저 수는 별도 계산 필요
+                // 현재 페이지의 데이터로 대략적인 추정
+                const users = data.users;
+                if (users && users.length > 0) {
+                    const activeCount = users.filter(u => u.is_active).length;
+                    const inactiveCount = users.filter(u => !u.is_active).length;
+
+                    // 전체 비율로 추정
+                    if (users.length === total) {
+                        document.getElementById('stat-active-users').textContent = activeCount;
+                        document.getElementById('stat-inactive-users').textContent = inactiveCount;
+                    } else {
+                        document.getElementById('stat-active-users').textContent = '~' + Math.round(activeCount * total / users.length);
+                        document.getElementById('stat-inactive-users').textContent = '~' + Math.round(inactiveCount * total / users.length);
+                    }
+                }
+            } else if (type === 'posts') {
+                const total = data.pagination.total_items;
+                document.getElementById('stat-total-posts').textContent = total;
+
+                const posts = data.posts;
+                if (posts && posts.length > 0) {
+                    const pinnedCount = posts.filter(p => p.is_pinned).length;
+                    const deletedCount = posts.filter(p => p.is_deleted).length;
+
+                    if (posts.length === total) {
+                        document.getElementById('stat-pinned-posts').textContent = pinnedCount;
+                        document.getElementById('stat-deleted-posts').textContent = deletedCount;
+                    } else {
+                        document.getElementById('stat-pinned-posts').textContent = '~' + Math.round(pinnedCount * total / posts.length);
+                        document.getElementById('stat-deleted-posts').textContent = '~' + Math.round(deletedCount * total / posts.length);
+                    }
+                }
+            } else if (type === 'comments') {
+                const total = data.pagination.total_items;
+                document.getElementById('stat-total-comments').textContent = total;
+
+                const comments = data.comments;
+                if (comments && comments.length > 0) {
+                    const deletedCount = comments.filter(c => c.is_deleted).length;
+
+                    if (comments.length === total) {
+                        document.getElementById('stat-deleted-comments').textContent = deletedCount;
+                    } else {
+                        document.getElementById('stat-deleted-comments').textContent = '~' + Math.round(deletedCount * total / comments.length);
+                    }
+                }
+            } else if (type === 'reports') {
+                const total = data.pagination.total_items;
+                document.getElementById('stat-total-reports').textContent = total;
+
+                const reports = data.reports;
+                if (reports && reports.length > 0) {
+                    const pendingCount = reports.filter(r => r.status === 'pending').length;
+                    const approvedCount = reports.filter(r => r.status === 'approved').length;
+                    const rejectedCount = reports.filter(r => r.status === 'rejected').length;
+
+                    if (reports.length === total) {
+                        document.getElementById('stat-pending-reports').textContent = pendingCount;
+                        document.getElementById('stat-approved-reports').textContent = approvedCount;
+                        document.getElementById('stat-rejected-reports').textContent = rejectedCount;
+                    } else {
+                        document.getElementById('stat-pending-reports').textContent = '~' + Math.round(pendingCount * total / reports.length);
+                        document.getElementById('stat-approved-reports').textContent = '~' + Math.round(approvedCount * total / reports.length);
+                        document.getElementById('stat-rejected-reports').textContent = '~' + Math.round(rejectedCount * total / reports.length);
+                    }
+                }
+            }
         }
 
         function formatDate(dateString) {
