@@ -625,11 +625,14 @@
             const token = localStorage.getItem('authToken');
             if (!token) {
                 // 로그인하지 않은 경우 개인 일정 없음
+                console.log('No auth token, skipping user events load');
                 return;
             }
 
             try {
+                console.log('Loading user events...');
                 const response = await API.calendarEvents.getAll();
+                console.log('User events response:', response);
 
                 if (response.success && response.data) {
                     userEvents = response.data.map(event => ({
@@ -639,8 +642,12 @@
                         type: 'personal'
                     }));
 
+                    console.log('Loaded user events:', userEvents);
+                    console.log('Calling renderCalendar and displayEventsList...');
                     renderCalendar();
                     displayEventsList();
+                } else {
+                    console.warn('No user events data in response');
                 }
             } catch (error) {
                 console.error('Failed to load user events:', error);
@@ -959,9 +966,8 @@
                 if (response.success) {
                     alert(currentEditingEventId ? '일정이 수정되었습니다.' : '일정이 추가되었습니다.');
                     closeEventModal();
+                    // loadUserEvents 내부에서 이미 renderCalendar와 displayEventsList를 호출함
                     await loadUserEvents();
-                    renderCalendar();
-                    displayEventsList();
                 } else {
                     alert('일정 저장에 실패했습니다.');
                 }
