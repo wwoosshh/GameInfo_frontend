@@ -299,6 +299,72 @@ const API = {
     },
 
     /**
+     * 사용자 캘린더 일정 관련 API
+     */
+    calendarEvents: {
+        /**
+         * 사용자 일정 목록 조회
+         *
+         * @param {object} params - 쿼리 파라미터 (start_date, end_date)
+         * @returns {Promise}
+         */
+        async getAll(params = {}) {
+            const queryString = new URLSearchParams(params).toString();
+            const endpoint = `/calendar-events${queryString ? '?' + queryString : ''}`;
+            return API.request(endpoint);
+        },
+
+        /**
+         * 특정 일정 조회
+         *
+         * @param {number} eventId - 일정 ID
+         * @returns {Promise}
+         */
+        async getById(eventId) {
+            return API.request(`/calendar-events/${eventId}`);
+        },
+
+        /**
+         * 일정 생성
+         *
+         * @param {object} eventData - 일정 데이터
+         * @returns {Promise}
+         */
+        async create(eventData) {
+            return API.request('/calendar-events', {
+                method: 'POST',
+                body: JSON.stringify(eventData),
+            });
+        },
+
+        /**
+         * 일정 수정
+         *
+         * @param {number} eventId - 일정 ID
+         * @param {object} eventData - 일정 데이터
+         * @returns {Promise}
+         */
+        async update(eventId, eventData) {
+            return API.request(`/calendar-events/${eventId}`, {
+                method: 'PUT',
+                body: JSON.stringify(eventData),
+            });
+        },
+
+        /**
+         * 일정 삭제
+         *
+         * @param {number} eventId - 일정 ID
+         * @returns {Promise}
+         */
+        async delete(eventId) {
+            return API.request(`/calendar-events/${eventId}`, {
+                method: 'DELETE',
+            });
+        },
+    },
+
+    /**
      * 사용자 관련 API
      */
     user: {

@@ -146,6 +146,15 @@
             background: rgba(96, 165, 250, 0.3);
         }
 
+        .event-dot.personal {
+            background: rgba(34, 197, 94, 0.2);
+            border-left-color: var(--accent-green);
+        }
+
+        .event-dot.personal:hover {
+            background: rgba(34, 197, 94, 0.3);
+        }
+
         /* 이벤트 리스트 (캘린더 하단) */
         .events-list-section {
             margin-top: 48px;
@@ -200,6 +209,171 @@
             color: var(--text-secondary);
         }
 
+        /* 모달 스타일 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--divider);
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--divider);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .modal-header .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .modal-header .close-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .modal-content {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--bg-primary);
+            border: 1px solid var(--divider);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group .checkbox-wrapper input[type="checkbox"] {
+            width: auto;
+        }
+
+        .modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--divider);
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .modal-footer button {
+            padding: 8px 16px;
+            border: 1px solid var(--divider);
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .modal-footer .btn-cancel {
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+        }
+
+        .modal-footer .btn-cancel:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .modal-footer .btn-submit {
+            background: var(--accent-blue);
+            color: var(--bg-primary);
+            border-color: var(--accent-blue);
+        }
+
+        .modal-footer .btn-submit:hover {
+            background: #3b82f6;
+        }
+
+        .modal-footer .btn-delete {
+            background: var(--accent-red);
+            color: white;
+            border-color: var(--accent-red);
+            margin-right: auto;
+        }
+
+        .modal-footer .btn-delete:hover {
+            background: #dc2626;
+        }
+
         @media (max-width: 768px) {
             .calendar-grid {
                 gap: 0;
@@ -236,6 +410,51 @@
     </style>
 </head>
 <body>
+    <!-- 일정 추가/수정 모달 -->
+    <div id="event-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-title">일정 추가</h3>
+                <button class="close-btn" onclick="closeEventModal()">&times;</button>
+            </div>
+            <div class="modal-content">
+                <form id="event-form">
+                    <div class="form-group">
+                        <label for="event-title">제목 *</label>
+                        <input type="text" id="event-title" name="event_title" required maxlength="100">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="event-description">설명</label>
+                        <textarea id="event-description" name="event_description" maxlength="500"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="event-date">날짜 *</label>
+                        <input type="date" id="event-date" name="event_date" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="event-time">시간</label>
+                        <input type="time" id="event-time" name="event_time">
+                    </div>
+
+                    <div class="form-group">
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" id="is-all-day" name="is_all_day">
+                            <label for="is-all-day" style="margin: 0;">하루 종일</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-delete" id="btn-delete-event" style="display: none;" onclick="handleDeleteEvent()">삭제</button>
+                <button class="btn-cancel" onclick="closeEventModal()">취소</button>
+                <button class="btn-submit" onclick="handleSaveEvent()">저장</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 헤더 -->
     <header class="main-header">
         <div class="container">
@@ -317,21 +536,39 @@
     <script>
         let currentYear = new Date().getFullYear();
         let currentMonth = new Date().getMonth(); // 0-11
-        let events = [];
+        let events = []; // 게임 업데이트 이벤트
+        let userEvents = []; // 사용자 개인 일정
+        let currentEditingEventId = null;
 
         // 페이지 로드 시
         document.addEventListener('DOMContentLoaded', () => {
             renderCalendar();
             loadEvents();
+            loadUserEvents();
 
             // 이벤트 리스너
             document.getElementById('btn-prev-month').addEventListener('click', () => changeMonth(-1));
             document.getElementById('btn-next-month').addEventListener('click', () => changeMonth(1));
             document.getElementById('btn-today').addEventListener('click', goToToday);
+
+            // 모달 외부 클릭 시 닫기
+            document.getElementById('event-modal').addEventListener('click', (e) => {
+                if (e.target.id === 'event-modal') {
+                    closeEventModal();
+                }
+            });
+
+            // 하루 종일 체크박스 변경 시 시간 입력 비활성화
+            document.getElementById('is-all-day').addEventListener('change', (e) => {
+                document.getElementById('event-time').disabled = e.target.checked;
+                if (e.target.checked) {
+                    document.getElementById('event-time').value = '';
+                }
+            });
         });
 
 
-        // 이벤트 로드
+        // 게임 업데이트 이벤트 로드
         async function loadEvents() {
             const eventsList = document.getElementById('events-list');
 
@@ -361,7 +598,8 @@
                                     game: game.game_name,
                                     gameId: game.game_id,
                                     versionId: v.version_id,
-                                    isCurrent: v.is_current
+                                    isCurrent: v.is_current,
+                                    type: 'game'
                                 }));
 
                             events.push(...gameVersionEvents);
@@ -379,6 +617,33 @@
             } catch (error) {
                 console.error('Failed to load events:', error);
                 eventsList.innerHTML = '<div class="empty-state"><h3>이벤트를 불러오는데 실패했습니다.</h3></div>';
+            }
+        }
+
+        // 사용자 개인 일정 로드
+        async function loadUserEvents() {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                // 로그인하지 않은 경우 개인 일정 없음
+                return;
+            }
+
+            try {
+                const response = await API.calendarEvents.getAll();
+
+                if (response.success && response.data) {
+                    userEvents = response.data.map(event => ({
+                        ...event,
+                        date: event.event_date,
+                        title: event.event_title,
+                        type: 'personal'
+                    }));
+
+                    renderCalendar();
+                    displayEventsList();
+                }
+            } catch (error) {
+                console.error('Failed to load user events:', error);
             }
         }
 
@@ -441,29 +706,58 @@
             dayNumber.textContent = date.getDate();
             cell.appendChild(dayNumber);
 
+            // 날짜 클릭 시 일정 추가 (로그인한 경우에만)
+            if (localStorage.getItem('authToken') && date.getMonth() === currentMonth) {
+                cell.style.cursor = 'pointer';
+                cell.onclick = (e) => {
+                    // 이벤트 dot을 클릭한 경우가 아닐 때만
+                    if (!e.target.classList.contains('event-dot')) {
+                        openAddEventModal(formatDate(date));
+                    }
+                };
+            }
+
             // 이벤트 표시
             const dayEvents = document.createElement('div');
             dayEvents.className = 'day-events';
 
             const dateStr = formatDate(date);
-            const dayEventList = events.filter(event => event.date === dateStr);
+            const gameEventList = events.filter(event => event.date === dateStr);
+            const userEventList = userEvents.filter(event => event.date === dateStr);
+            const allEvents = [...gameEventList, ...userEventList];
 
-            dayEventList.slice(0, 3).forEach(event => {
+            allEvents.slice(0, 3).forEach(event => {
                 const eventDot = document.createElement('div');
                 eventDot.className = 'event-dot';
-                eventDot.textContent = event.game;
-                eventDot.title = `${event.game} - ${event.title}`;
-                eventDot.onclick = () => goToVersion(event.versionId);
+
+                if (event.type === 'personal') {
+                    eventDot.classList.add('personal');
+                    eventDot.textContent = event.title;
+                    eventDot.title = event.title;
+                    eventDot.onclick = (e) => {
+                        e.stopPropagation();
+                        openEditEventModal(event.event_id);
+                    };
+                } else {
+                    eventDot.textContent = event.game;
+                    eventDot.title = `${event.game} - ${event.title}`;
+                    eventDot.onclick = (e) => {
+                        e.stopPropagation();
+                        goToVersion(event.versionId);
+                    };
+                }
+
                 dayEvents.appendChild(eventDot);
             });
 
-            if (dayEventList.length > 3) {
+            if (allEvents.length > 3) {
                 const moreDot = document.createElement('div');
                 moreDot.className = 'event-dot';
-                moreDot.textContent = `+${dayEventList.length - 3}`;
+                moreDot.textContent = `+${allEvents.length - 3}`;
                 moreDot.style.background = 'transparent';
                 moreDot.style.borderLeft = 'none';
                 moreDot.style.color = 'var(--text-muted)';
+                moreDot.style.cursor = 'default';
                 dayEvents.appendChild(moreDot);
             }
 
@@ -476,34 +770,52 @@
             const eventsList = document.getElementById('events-list');
             const eventsTitle = document.getElementById('events-month-title');
 
-            eventsTitle.textContent = `${currentYear}년 ${currentMonth + 1}월 예정된 업데이트`;
+            eventsTitle.textContent = `${currentYear}년 ${currentMonth + 1}월 예정된 일정`;
 
             // 현재 월의 이벤트만 필터링
-            const monthEvents = events.filter(event => {
+            const monthGameEvents = events.filter(event => {
                 const eventDate = new Date(event.date);
                 return eventDate.getFullYear() === currentYear &&
                        eventDate.getMonth() === currentMonth;
             });
 
-            // 날짜순 정렬
-            monthEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
+            const monthUserEvents = userEvents.filter(event => {
+                const eventDate = new Date(event.date);
+                return eventDate.getFullYear() === currentYear &&
+                       eventDate.getMonth() === currentMonth;
+            });
 
-            if (monthEvents.length === 0) {
-                eventsList.innerHTML = '<div class="empty-state"><h3>이번 달 예정된 업데이트가 없습니다.</h3></div>';
+            const allMonthEvents = [...monthGameEvents, ...monthUserEvents];
+
+            // 날짜순 정렬
+            allMonthEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            if (allMonthEvents.length === 0) {
+                eventsList.innerHTML = '<div class="empty-state"><h3>이번 달 예정된 일정이 없습니다.</h3></div>';
                 return;
             }
 
-            eventsList.innerHTML = monthEvents.map(event => {
+            eventsList.innerHTML = allMonthEvents.map(event => {
                 const eventDate = new Date(event.date);
                 const dateLabel = `${eventDate.getMonth() + 1}월 ${eventDate.getDate()}일`;
 
-                return `
-                    <div class="event-item" onclick="goToVersion(${event.versionId})">
-                        <div class="event-date-label">${dateLabel}</div>
-                        <div class="event-title">${escapeHtml(event.title)}</div>
-                        <div class="event-game">${escapeHtml(event.game)}</div>
-                    </div>
-                `;
+                if (event.type === 'personal') {
+                    return `
+                        <div class="event-item" onclick="openEditEventModal(${event.event_id})" style="border-left: 3px solid var(--accent-green);">
+                            <div class="event-date-label">${dateLabel}${event.event_time ? ' ' + event.event_time : ''}</div>
+                            <div class="event-title">${escapeHtml(event.title)}</div>
+                            <div class="event-game" style="color: var(--accent-green);">개인 일정</div>
+                        </div>
+                    `;
+                } else {
+                    return `
+                        <div class="event-item" onclick="goToVersion(${event.versionId})" style="border-left: 3px solid var(--accent-blue);">
+                            <div class="event-date-label">${dateLabel}</div>
+                            <div class="event-title">${escapeHtml(event.title)}</div>
+                            <div class="event-game">${escapeHtml(event.game)}</div>
+                        </div>
+                    `;
+                }
             }).join('');
         }
 
@@ -551,6 +863,131 @@
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+
+        // 일정 추가 모달 열기
+        function openAddEventModal(date) {
+            if (!requireLogin()) {
+                return;
+            }
+
+            currentEditingEventId = null;
+            document.getElementById('modal-title').textContent = '일정 추가';
+            document.getElementById('btn-delete-event').style.display = 'none';
+
+            // 폼 초기화
+            document.getElementById('event-form').reset();
+            document.getElementById('event-date').value = date;
+            document.getElementById('event-time').disabled = false;
+
+            // 모달 표시
+            document.getElementById('event-modal').classList.add('show');
+        }
+
+        // 일정 수정 모달 열기
+        async function openEditEventModal(eventId) {
+            if (!requireLogin()) {
+                return;
+            }
+
+            currentEditingEventId = eventId;
+            document.getElementById('modal-title').textContent = '일정 수정';
+            document.getElementById('btn-delete-event').style.display = 'block';
+
+            try {
+                const response = await API.calendarEvents.getById(eventId);
+
+                if (response.success && response.data) {
+                    const event = response.data;
+
+                    document.getElementById('event-title').value = event.event_title;
+                    document.getElementById('event-description').value = event.event_description || '';
+                    document.getElementById('event-date').value = event.event_date;
+                    document.getElementById('event-time').value = event.event_time || '';
+                    document.getElementById('is-all-day').checked = event.is_all_day || false;
+                    document.getElementById('event-time').disabled = event.is_all_day || false;
+
+                    // 모달 표시
+                    document.getElementById('event-modal').classList.add('show');
+                }
+            } catch (error) {
+                console.error('Failed to load event:', error);
+                alert('일정을 불러오는데 실패했습니다.');
+            }
+        }
+
+        // 모달 닫기
+        function closeEventModal() {
+            document.getElementById('event-modal').classList.remove('show');
+            document.getElementById('event-form').reset();
+            currentEditingEventId = null;
+        }
+
+        // 일정 저장 (추가/수정)
+        async function handleSaveEvent() {
+            const form = document.getElementById('event-form');
+
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const eventData = {
+                event_title: document.getElementById('event-title').value.trim(),
+                event_description: document.getElementById('event-description').value.trim(),
+                event_date: document.getElementById('event-date').value,
+                event_time: document.getElementById('is-all-day').checked ? null : document.getElementById('event-time').value,
+                is_all_day: document.getElementById('is-all-day').checked
+            };
+
+            try {
+                let response;
+
+                if (currentEditingEventId) {
+                    // 수정
+                    response = await API.calendarEvents.update(currentEditingEventId, eventData);
+                } else {
+                    // 추가
+                    response = await API.calendarEvents.create(eventData);
+                }
+
+                if (response.success) {
+                    alert(currentEditingEventId ? '일정이 수정되었습니다.' : '일정이 추가되었습니다.');
+                    closeEventModal();
+                    await loadUserEvents();
+                } else {
+                    alert('일정 저장에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('Failed to save event:', error);
+                alert('일정 저장 중 오류가 발생했습니다.');
+            }
+        }
+
+        // 일정 삭제
+        async function handleDeleteEvent() {
+            if (!currentEditingEventId) {
+                return;
+            }
+
+            if (!confirm('정말 이 일정을 삭제하시겠습니까?')) {
+                return;
+            }
+
+            try {
+                const response = await API.calendarEvents.delete(currentEditingEventId);
+
+                if (response.success) {
+                    alert('일정이 삭제되었습니다.');
+                    closeEventModal();
+                    await loadUserEvents();
+                } else {
+                    alert('일정 삭제에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('Failed to delete event:', error);
+                alert('일정 삭제 중 오류가 발생했습니다.');
+            }
         }
     </script>
 </body>

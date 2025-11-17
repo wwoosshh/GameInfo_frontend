@@ -81,6 +81,7 @@
             padding: 20px 0;
             border-bottom: 1px solid var(--divider);
             transition: var(--transition);
+            cursor: pointer;
         }
 
         .post-item:hover {
@@ -530,7 +531,7 @@
                 });
 
                 return `
-                    <div class="post-item ${post.is_pinned ? 'pinned' : ''}">
+                    <div class="post-item ${post.is_pinned ? 'pinned' : ''}" onclick="window.location.href='community_post.html?id=${post.post_id}'">
                         <div class="post-meta">
                             <span class="category ${post.category}">${categoryName}</span>
                             ${post.game_name ? `<span class="game-name">${post.game_name}</span>` : ''}
@@ -540,9 +541,7 @@
                             <span class="date">${createdAt}</span>
                         </div>
                         <h3 class="post-title">
-                            <a href="community_post.html?id=${post.post_id}">
-                                ${post.is_pinned ? '[공지] ' : ''}${post.title}
-                            </a>
+                            ${post.is_pinned ? '[공지] ' : ''}${post.title}
                         </h3>
                         <p class="post-excerpt">${excerpt}</p>
                         <div class="post-stats">
