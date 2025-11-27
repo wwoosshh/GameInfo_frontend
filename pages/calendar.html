@@ -892,17 +892,15 @@
             document.getElementById('modal-title').textContent = '일정 추가';
             document.getElementById('btn-delete-event').style.display = 'none';
 
-            // 폼 초기화
-            document.getElementById('event-form').reset();
-
-            // reset() 후에 날짜 설정 (reset이 날짜를 지울 수 있음)
-            // setTimeout으로 reset이 완전히 완료된 후 설정
-            setTimeout(() => {
-                document.getElementById('event-date').value = date;
-                console.log('Date field set to:', date);
-            }, 0);
-
+            // 수동으로 폼 필드 초기화 (reset() 사용하지 않음 - 타이밍 문제 방지)
+            document.getElementById('event-title').value = '';
+            document.getElementById('event-description').value = '';
+            document.getElementById('event-date').value = date; // 선택한 날짜 설정
+            document.getElementById('event-time').value = '';
+            document.getElementById('is-all-day').checked = false;
             document.getElementById('event-time').disabled = false;
+
+            console.log('Date field set to:', document.getElementById('event-date').value);
 
             // 모달 표시
             document.getElementById('event-modal').classList.add('show');
