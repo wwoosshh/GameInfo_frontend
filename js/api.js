@@ -571,6 +571,23 @@ const API = {
     },
 
     /**
+     * 검색 API
+     */
+    search: {
+        /**
+         * 게임/버전/항목 통합 검색
+         *
+         * @param {string} query - 검색어
+         * @param {object} params - 추가 파라미터 (page, limit)
+         * @returns {Promise}
+         */
+        async query(query, params = {}) {
+            const queryParams = new URLSearchParams({ q: query, ...params }).toString();
+            return API.request(`/search?${queryParams}`);
+        },
+    },
+
+    /**
      * 관리자 API
      */
     admin: {
