@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 채팅 - GameInfo</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <style>
+        /* 레이아웃 */
+        .chat-container {
+            display: flex;
+            height: calc(100vh - 140px);
+            max-width: 1400px;
+            margin: 0 auto;
+            gap: 0;
+        }
+
+        /* 사이드바 - 대화방 목록 */
+        .chat-sidebar {
+            width: 280px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--divider);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--divider);
+        }
+
+        .new-chat-btn {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .new-chat-btn:hover {
+            background: #3b82f6;
+        }
+
+        .chat-rooms-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+
+        .chat-room-item {
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 4px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chat-room-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .chat-room-item.active {
+            background: var(--bg-hover);
+            border: 1px solid var(--accent-blue);
+        }
+
+        .chat-room-icon {
+            font-size: 18px;
+        }
+
+        .chat-room-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .chat-room-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-room-date {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .chat-room-delete {
+            opacity: 0;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            font-size: 16px;
+            transition: var(--transition);
+        }
+
+        .chat-room-item:hover .chat-room-delete {
+            opacity: 1;
+        }
+
+        .chat-room-delete:hover {
+            color: var(--accent-red);
+        }
+
+        /* 메인 채팅 영역 */
+        .chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        /* 채팅 헤더 */
+        .chat-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--divider);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-secondary);
+        }
+
+        .chat-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chat-header-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .model-selector {
+            padding: 6px 12px;
+            background: var(--bg-primary);
+            border: 1px solid var(--divider);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .settings-btn {
+            padding: 8px 12px;
+            background: var(--bg-primary);
+            border: 1px solid var(--divider);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .settings-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        /* 메시지 영역 */
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .message {
+            display: flex;
+            gap: 16px;
+            max-width: 900px;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+            align-self: flex-end;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .message.assistant .message-avatar {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        }
+
+        .message.user .message-avatar {
+            background: var(--accent-blue);
+        }
+
+        .message-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .message-bubble {
+            padding: 14px 18px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .message.assistant .message-bubble {
+            background: var(--bg-secondary);
+            border: 1px solid var(--divider);
+            color: var(--text-primary);
+        }
+
+        .message.user .message-bubble {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        .message.user .message-time {
+            text-align: right;
+        }
+
+        /* 타이핑 인디케이터 */
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 8px 0;
+        }
+
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-4px); opacity: 1; }
+        }
+
+        /* 입력 영역 */
+        .chat-input-container {
+            padding: 16px 24px;
+            border-top: 1px solid var(--divider);
+            background: var(--bg-secondary);
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 14px 18px;
+            background: var(--bg-primary);
+            border: 1px solid var(--divider);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: inherit;
+            resize: none;
+            min-height: 24px;
+            max-height: 200px;
+            line-height: 1.5;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .chat-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .send-btn {
+            padding: 14px 20px;
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            background: #3b82f6;
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Ollama 미연결 상태 */
+        .ollama-not-connected {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 48px;
+            text-align: center;
+        }
+
+        .ollama-icon {
+            font-size: 64px;
+            margin-bottom: 24px;
+        }
+
+        .ollama-not-connected h2 {
+            font-size: 24px;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+
+        .ollama-not-connected p {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            max-width: 500px;
+            line-height: 1.6;
+        }
+
+        .ollama-steps {
+            text-align: left;
+            background: var(--bg-secondary);
+            border: 1px solid var(--divider);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            max-width: 500px;
+        }
+
+        .ollama-steps h3 {
+            font-size: 16px;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        .ollama-steps ol {
+            margin: 0;
+            padding-left: 20px;
+            color: var(--text-secondary);
+        }
+
+        .ollama-steps li {
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .ollama-steps code {
+            background: var(--bg-primary);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            color: var(--accent-blue);
+        }
+
+        .ollama-steps a {
+            color: var(--accent-blue);
+        }
+
+        .retry-btn {
+            padding: 12px 24px;
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .retry-btn:hover {
+            background: #3b82f6;
+        }
+
+        /* 설정 모달 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--divider);
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--divider);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .modal-content {
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--bg-primary);
+            border: 1px solid var(--divider);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-group input[type="range"] {
+            padding: 0;
+        }
+
+        .range-value {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--divider);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .modal-footer button {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-cancel {
+            background: var(--bg-primary);
+            border: 1px solid var(--divider);
+            color: var(--text-secondary);
+        }
+
+        .btn-save {
+            background: var(--accent-blue);
+            border: none;
+            color: white;
+        }
+
+        /* 빈 상태 */
+        .empty-chat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 48px;
+        }
+
+        .empty-chat-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .empty-chat h3 {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        /* 모바일 반응형 */
+        .sidebar-toggle {
+            display: none;
+            padding: 8px;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .chat-sidebar {
+                position: fixed;
+                left: -280px;
+                top: 60px;
+                bottom: 0;
+                z-index: 100;
+                transition: left 0.3s ease;
+            }
+
+            .chat-sidebar.show {
+                left: 0;
+            }
+
+            .sidebar-toggle {
+                display: block;
+            }
+
+            .chat-messages {
+                padding: 16px;
+            }
+
+            .message {
+                gap: 10px;
+            }
+
+            .message-avatar {
+                width: 32px;
+                height: 32px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="main-header">
+        <div class="container">
+            <div class="header-content">
+                <h1 class="site-title">
+                    <a href="index.html">GameInfo</a>
+                </h1>
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="index.html">홈</a></li>
+                        <li><a href="calendar.html">캘린더</a></li>
+                        <li><a href="games.html">게임 목록</a></li>
+                        <li id="nav-community"><a href="community.html">커뮤니티</a></li>
+                        <li><a href="ai_chat.html" class="active">AI 채팅</a></li>
+                        <li id="nav-admin" style="display:none;"><a href="admin.html">관리자</a></li>
+                        <li id="nav-profile" style="display:none;"><a href="profile.html">프로필</a></li>
+                        <li id="nav-login"><a href="login.html">로그인</a></li>
+                        <li id="nav-logout" style="display:none;"><a href="#" onclick="handleLogout(event)">로그아웃</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- 설정 모달 -->
+    <div id="settings-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>AI 설정</h3>
+                <button class="modal-close" onclick="closeSettingsModal()">&times;</button>
+            </div>
+            <div class="modal-content">
+                <div class="form-group">
+                    <label for="setting-model">기본 모델</label>
+                    <select id="setting-model"></select>
+                </div>
+                <div class="form-group">
+                    <label for="setting-temperature">Temperature (창의성)</label>
+                    <input type="range" id="setting-temperature" min="0" max="2" step="0.1" value="0.7">
+                    <div class="range-value">현재 값: <span id="temp-value">0.7</span></div>
+                </div>
+                <div class="form-group">
+                    <label for="setting-system-prompt">시스템 프롬프트</label>
+                    <textarea id="setting-system-prompt" placeholder="AI의 역할을 정의합니다..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeSettingsModal()">취소</button>
+                <button class="btn-save" onclick="saveSettings()">저장</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="main-content" style="padding: 0; max-width: none;">
+        <!-- Ollama 미연결 상태 -->
+        <div id="ollama-not-connected" class="ollama-not-connected" style="display: none;">
+            <div class="ollama-icon">🦙</div>
+            <h2>Ollama에 연결할 수 없습니다</h2>
+            <p>AI 채팅을 사용하려면 로컬에 Ollama가 설치되어 있어야 합니다.</p>
+
+            <div class="ollama-steps">
+                <h3>설치 방법</h3>
+                <ol>
+                    <li><a href="https://ollama.com/download" target="_blank">Ollama 다운로드</a> 페이지에서 설치 파일을 다운로드합니다.</li>
+                    <li>설치 후 터미널에서 모델을 다운로드합니다:
+                        <br><code>ollama pull llama3.2</code>
+                    </li>
+                    <li>CORS 설정을 위해 환경변수를 설정합니다:
+                        <br><code>set OLLAMA_ORIGINS=*</code> (Windows)
+                        <br><code>export OLLAMA_ORIGINS=*</code> (Mac/Linux)
+                    </li>
+                    <li>Ollama 서버를 재시작합니다:
+                        <br><code>ollama serve</code>
+                    </li>
+                </ol>
+            </div>
+
+            <button class="retry-btn" onclick="checkOllamaConnection()">다시 연결 시도</button>
+        </div>
+
+        <!-- 채팅 컨테이너 -->
+        <div id="chat-container" class="chat-container" style="display: none;">
+            <!-- 사이드바 -->
+            <aside class="chat-sidebar" id="chat-sidebar">
+                <div class="sidebar-header">
+                    <button class="new-chat-btn" onclick="createNewChat()">
+                        <span>+</span> 새 대화
+                    </button>
+                </div>
+                <div class="chat-rooms-list" id="chat-rooms-list">
+                    <!-- 대화방 목록 -->
+                </div>
+            </aside>
+
+            <!-- 메인 채팅 -->
+            <div class="chat-main">
+                <div class="chat-header">
+                    <div class="chat-header-left">
+                        <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+                        <span class="chat-header-title" id="chat-title">새 대화</span>
+                    </div>
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <select class="model-selector" id="model-selector" onchange="changeModel()">
+                            <!-- 모델 목록 -->
+                        </select>
+                        <button class="settings-btn" onclick="openSettingsModal()">⚙️ 설정</button>
+                    </div>
+                </div>
+
+                <div class="chat-messages" id="chat-messages">
+                    <div class="empty-chat">
+                        <div class="empty-chat-icon">💬</div>
+                        <h3>대화를 시작해보세요</h3>
+                        <p>AI에게 무엇이든 물어보세요</p>
+                    </div>
+                </div>
+
+                <div class="chat-input-container">
+                    <div class="chat-input-wrapper">
+                        <textarea
+                            class="chat-input"
+                            id="chat-input"
+                            placeholder="메시지를 입력하세요..."
+                            rows="1"
+                            onkeydown="handleInputKeydown(event)"
+                            oninput="autoResizeTextarea(this)"
+                        ></textarea>
+                        <button class="send-btn" id="send-btn" onclick="sendMessage()">
+                            전송
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/navigation.js"></script>
+    <script>
+        // Ollama 설정
+        const OLLAMA_BASE_URL = 'http://localhost:11434';
+
+        // 상태 변수
+        let isConnected = false;
+        let currentRoomId = null;
+        let chatRooms = [];
+        let isGenerating = false;
+        let currentModel = 'llama3.2';
+        let settings = {
+            defaultModel: 'llama3.2',
+            temperature: 0.7,
+            systemPrompt: '당신은 친절하고 도움이 되는 AI 어시스턴트입니다. 한국어로 대화해주세요.'
+        };
+
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSettings();
+            loadChatRooms();
+            checkOllamaConnection();
+        });
+
+        // Ollama 연결 확인
+        async function checkOllamaConnection() {
+            try {
+                const response = await fetch(`${OLLAMA_BASE_URL}/api/tags`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    isConnected = true;
+                    showChatInterface();
+                    populateModelSelector(data.models || []);
+                } else {
+                    throw new Error('Connection failed');
+                }
+            } catch (error) {
+                console.error('Ollama connection error:', error);
+                isConnected = false;
+                showNotConnected();
+            }
+        }
+
+        // 연결 안됨 화면 표시
+        function showNotConnected() {
+            document.getElementById('ollama-not-connected').style.display = 'flex';
+            document.getElementById('chat-container').style.display = 'none';
+        }
+
+        // 채팅 인터페이스 표시
+        function showChatInterface() {
+            document.getElementById('ollama-not-connected').style.display = 'none';
+            document.getElementById('chat-container').style.display = 'flex';
+
+            // 마지막 대화방 또는 새 대화 시작
+            if (chatRooms.length > 0) {
+                selectRoom(chatRooms[0].id);
+            }
+        }
+
+        // 모델 선택기 채우기
+        function populateModelSelector(models) {
+            const selector = document.getElementById('model-selector');
+            const settingModel = document.getElementById('setting-model');
+
+            if (models.length === 0) {
+                selector.innerHTML = '<option value="">모델 없음</option>';
+                settingModel.innerHTML = '<option value="">모델 없음</option>';
+                return;
+            }
+
+            const options = models.map(m =>
+                `<option value="${m.name}" ${m.name === currentModel ? 'selected' : ''}>${m.name}</option>`
+            ).join('');
+
+            selector.innerHTML = options;
+            settingModel.innerHTML = options;
+
+            // 저장된 모델이 있으면 선택
+            if (settings.defaultModel) {
+                selector.value = settings.defaultModel;
+                settingModel.value = settings.defaultModel;
+                currentModel = settings.defaultModel;
+            } else if (models.length > 0) {
+                currentModel = models[0].name;
+            }
+        }
+
+        // 모델 변경
+        function changeModel() {
+            currentModel = document.getElementById('model-selector').value;
+        }
+
+        // 대화방 관리
+        function loadChatRooms() {
+            const saved = localStorage.getItem('ai_chat_rooms');
+            chatRooms = saved ? JSON.parse(saved) : [];
+            renderChatRooms();
+        }
+
+        function saveChatRooms() {
+            localStorage.setItem('ai_chat_rooms', JSON.stringify(chatRooms));
+        }
+
+        function renderChatRooms() {
+            const list = document.getElementById('chat-rooms-list');
+
+            if (chatRooms.length === 0) {
+                list.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-muted);">대화가 없습니다</div>';
+                return;
+            }
+
+            list.innerHTML = chatRooms.map(room => `
+                <div class="chat-room-item ${room.id === currentRoomId ? 'active' : ''}" onclick="selectRoom('${room.id}')">
+                    <span class="chat-room-icon">💬</span>
+                    <div class="chat-room-info">
+                        <div class="chat-room-title">${escapeHtml(room.title)}</div>
+                        <div class="chat-room-date">${formatDate(room.updatedAt)}</div>
+                    </div>
+                    <button class="chat-room-delete" onclick="event.stopPropagation(); deleteRoom('${room.id}')">&times;</button>
+                </div>
+            `).join('');
+        }
+
+        function createNewChat() {
+            const room = {
+                id: 'room_' + Date.now(),
+                title: '새 대화',
+                model: currentModel,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+
+            chatRooms.unshift(room);
+            saveChatRooms();
+            selectRoom(room.id);
+            renderChatRooms();
+        }
+
+        function selectRoom(roomId) {
+            currentRoomId = roomId;
+            const room = chatRooms.find(r => r.id === roomId);
+
+            if (room) {
+                document.getElementById('chat-title').textContent = room.title;
+                if (room.model) {
+                    currentModel = room.model;
+                    document.getElementById('model-selector').value = room.model;
+                }
+            }
+
+            loadMessages();
+            renderChatRooms();
+        }
+
+        function deleteRoom(roomId) {
+            if (!confirm('이 대화를 삭제하시겠습니까?')) return;
+
+            chatRooms = chatRooms.filter(r => r.id !== roomId);
+            localStorage.removeItem(`ai_chat_messages_${roomId}`);
+            saveChatRooms();
+
+            if (currentRoomId === roomId) {
+                currentRoomId = null;
+                if (chatRooms.length > 0) {
+                    selectRoom(chatRooms[0].id);
+                } else {
+                    document.getElementById('chat-messages').innerHTML = `
+                        <div class="empty-chat">
+                            <div class="empty-chat-icon">💬</div>
+                            <h3>대화를 시작해보세요</h3>
+                            <p>AI에게 무엇이든 물어보세요</p>
+                        </div>
+                    `;
+                    document.getElementById('chat-title').textContent = '새 대화';
+                }
+            }
+
+            renderChatRooms();
+        }
+
+        // 메시지 관리
+        function loadMessages() {
+            if (!currentRoomId) return;
+
+            const saved = localStorage.getItem(`ai_chat_messages_${currentRoomId}`);
+            const messages = saved ? JSON.parse(saved) : [];
+
+            renderMessages(messages);
+        }
+
+        function saveMessages(messages) {
+            if (!currentRoomId) return;
+            localStorage.setItem(`ai_chat_messages_${currentRoomId}`, JSON.stringify(messages));
+        }
+
+        function getMessages() {
+            if (!currentRoomId) return [];
+            const saved = localStorage.getItem(`ai_chat_messages_${currentRoomId}`);
+            return saved ? JSON.parse(saved) : [];
+        }
+
+        function renderMessages(messages) {
+            const container = document.getElementById('chat-messages');
+
+            if (messages.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-chat">
+                        <div class="empty-chat-icon">💬</div>
+                        <h3>대화를 시작해보세요</h3>
+                        <p>AI에게 무엇이든 물어보세요</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = messages.map(msg => `
+                <div class="message ${msg.role}">
+                    <div class="message-avatar">${msg.role === 'user' ? '👤' : '🤖'}</div>
+                    <div class="message-content">
+                        <div class="message-bubble">${escapeHtml(msg.content)}</div>
+                        <div class="message-time">${formatTime(msg.timestamp)}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // 메시지 전송
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const content = input.value.trim();
+
+            if (!content || isGenerating) return;
+
+            // 대화방이 없으면 생성
+            if (!currentRoomId) {
+                createNewChat();
+            }
+
+            // 사용자 메시지 추가
+            const messages = getMessages();
+            const userMessage = {
+                role: 'user',
+                content: content,
+                timestamp: new Date().toISOString()
+            };
+            messages.push(userMessage);
+            saveMessages(messages);
+            renderMessages(messages);
+
+            // 입력 초기화
+            input.value = '';
+            input.style.height = 'auto';
+
+            // 대화방 제목 업데이트 (첫 메시지인 경우)
+            if (messages.length === 1) {
+                updateRoomTitle(content.substring(0, 30) + (content.length > 30 ? '...' : ''));
+            }
+
+            // AI 응답 생성
+            await generateResponse(messages);
+        }
+
+        async function generateResponse(messages) {
+            isGenerating = true;
+            document.getElementById('send-btn').disabled = true;
+
+            const container = document.getElementById('chat-messages');
+
+            // 타이핑 인디케이터 추가
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message assistant';
+            typingDiv.id = 'typing-message';
+            typingDiv.innerHTML = `
+                <div class="message-avatar">🤖</div>
+                <div class="message-content">
+                    <div class="message-bubble">
+                        <div class="typing-indicator">
+                            <span></span><span></span><span></span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(typingDiv);
+            container.scrollTop = container.scrollHeight;
+
+            try {
+                // Ollama API 호출 (스트리밍)
+                const response = await fetch(`${OLLAMA_BASE_URL}/api/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: currentModel,
+                        messages: [
+                            { role: 'system', content: settings.systemPrompt },
+                            ...messages.map(m => ({ role: m.role, content: m.content }))
+                        ],
+                        stream: true,
+                        options: {
+                            temperature: settings.temperature
+                        }
+                    })
+                });
+
+                if (!response.ok) throw new Error('API request failed');
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let assistantContent = '';
+
+                // 타이핑 메시지를 실제 응답으로 변경
+                typingDiv.querySelector('.message-bubble').innerHTML = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split('\n').filter(line => line.trim());
+
+                    for (const line of lines) {
+                        try {
+                            const data = JSON.parse(line);
+                            if (data.message && data.message.content) {
+                                assistantContent += data.message.content;
+                                typingDiv.querySelector('.message-bubble').textContent = assistantContent;
+                                container.scrollTop = container.scrollHeight;
+                            }
+                        } catch (e) {
+                            // JSON 파싱 오류 무시
+                        }
+                    }
+                }
+
+                // 최종 메시지 저장
+                if (assistantContent) {
+                    const assistantMessage = {
+                        role: 'assistant',
+                        content: assistantContent,
+                        timestamp: new Date().toISOString()
+                    };
+                    messages.push(assistantMessage);
+                    saveMessages(messages);
+
+                    // 타이핑 메시지에 시간 추가
+                    const timeDiv = document.createElement('div');
+                    timeDiv.className = 'message-time';
+                    timeDiv.textContent = formatTime(assistantMessage.timestamp);
+                    typingDiv.querySelector('.message-content').appendChild(timeDiv);
+
+                    // 대화방 업데이트 시간 갱신
+                    updateRoomTimestamp();
+                }
+
+            } catch (error) {
+                console.error('Generation error:', error);
+                typingDiv.querySelector('.message-bubble').innerHTML =
+                    '<span style="color: var(--accent-red);">응답 생성 중 오류가 발생했습니다. Ollama가 실행 중인지 확인해주세요.</span>';
+            }
+
+            isGenerating = false;
+            document.getElementById('send-btn').disabled = false;
+            typingDiv.id = '';
+        }
+
+        function updateRoomTitle(title) {
+            const room = chatRooms.find(r => r.id === currentRoomId);
+            if (room) {
+                room.title = title;
+                saveChatRooms();
+                renderChatRooms();
+                document.getElementById('chat-title').textContent = title;
+            }
+        }
+
+        function updateRoomTimestamp() {
+            const room = chatRooms.find(r => r.id === currentRoomId);
+            if (room) {
+                room.updatedAt = new Date().toISOString();
+                // 최근 대화를 맨 위로
+                chatRooms.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+                saveChatRooms();
+                renderChatRooms();
+            }
+        }
+
+        // 설정 관리
+        function loadSettings() {
+            const saved = localStorage.getItem('ai_chat_settings');
+            if (saved) {
+                settings = { ...settings, ...JSON.parse(saved) };
+            }
+            currentModel = settings.defaultModel;
+        }
+
+        function saveSettings() {
+            settings.defaultModel = document.getElementById('setting-model').value;
+            settings.temperature = parseFloat(document.getElementById('setting-temperature').value);
+            settings.systemPrompt = document.getElementById('setting-system-prompt').value;
+
+            localStorage.setItem('ai_chat_settings', JSON.stringify(settings));
+            currentModel = settings.defaultModel;
+            document.getElementById('model-selector').value = currentModel;
+
+            closeSettingsModal();
+        }
+
+        function openSettingsModal() {
+            document.getElementById('setting-model').value = settings.defaultModel;
+            document.getElementById('setting-temperature').value = settings.temperature;
+            document.getElementById('temp-value').textContent = settings.temperature;
+            document.getElementById('setting-system-prompt').value = settings.systemPrompt;
+            document.getElementById('settings-modal').classList.add('show');
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settings-modal').classList.remove('show');
+        }
+
+        // Temperature 슬라이더 값 표시
+        document.getElementById('setting-temperature').addEventListener('input', (e) => {
+            document.getElementById('temp-value').textContent = e.target.value;
+        });
+
+        // 유틸리티 함수
+        function handleInputKeydown(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function autoResizeTextarea(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 200) + 'px';
+        }
+
+        function toggleSidebar() {
+            document.getElementById('chat-sidebar').classList.toggle('show');
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = now - date;
+
+            if (diff < 86400000) { // 24시간 이내
+                return formatTime(dateString);
+            } else if (diff < 604800000) { // 7일 이내
+                const days = Math.floor(diff / 86400000);
+                return `${days}일 전`;
+            } else {
+                return `${date.getMonth() + 1}/${date.getDate()}`;
+            }
+        }
+
+        function formatTime(dateString) {
+            const date = new Date(dateString);
+            return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 모달 외부 클릭 시 닫기
+        document.getElementById('settings-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'settings-modal') {
+                closeSettingsModal();
+            }
+        });
+    </script>
+</body>
+</html>
