@@ -700,8 +700,13 @@
             const cell = document.createElement('div');
             cell.className = 'calendar-day';
 
+            // 클로저 문제 방지: 날짜를 미리 문자열로 저장
+            const dateStr = formatDate(date);
+            const dateMonth = date.getMonth();
+            const dateDay = date.getDate();
+
             // 다른 달 날짜 표시
-            if (date.getMonth() !== currentMonth) {
+            if (dateMonth !== currentMonth) {
                 cell.classList.add('other-month');
             }
 
@@ -713,16 +718,16 @@
             // 날짜 숫자
             const dayNumber = document.createElement('div');
             dayNumber.className = 'day-number';
-            dayNumber.textContent = date.getDate();
+            dayNumber.textContent = dateDay;
             cell.appendChild(dayNumber);
 
             // 날짜 클릭 시 일정 추가 (로그인한 경우에만)
-            if (localStorage.getItem('authToken') && date.getMonth() === currentMonth) {
+            if (localStorage.getItem('authToken') && dateMonth === currentMonth) {
                 cell.style.cursor = 'pointer';
                 cell.onclick = (e) => {
                     // 이벤트 dot을 클릭한 경우가 아닐 때만
                     if (!e.target.classList.contains('event-dot')) {
-                        openAddEventModal(formatDate(date));
+                        openAddEventModal(dateStr); // 미리 저장된 문자열 사용
                     }
                 };
             }
@@ -730,8 +735,6 @@
             // 이벤트 표시
             const dayEvents = document.createElement('div');
             dayEvents.className = 'day-events';
-
-            const dateStr = formatDate(date);
             const gameEventList = events.filter(event => event.date === dateStr);
             const userEventList = userEvents.filter(event => event.date === dateStr);
             const allEvents = [...gameEventList, ...userEventList];
