@@ -808,53 +808,49 @@
             checkOllamaConnection();
         });
 
-        // Ollama 연결 확인
         // 배치 파일 다운로드 함수
         function downloadOllamaBat() {
             const batContent = `@echo off
-chcp 65001 >nul
 echo ========================================
-echo   Ollama 웹 접근 허용 모드로 시작
+echo   Ollama Web Access Mode
 echo ========================================
 echo.
 
-:: 기존 Ollama 프로세스 종료
-echo 기존 Ollama 프로세스 종료 중...
+echo Stopping existing Ollama process...
 taskkill /f /im ollama.exe >nul 2>&1
-timeout /t 2 /nobreak >nul
+taskkill /f /im "ollama app.exe" >nul 2>&1
+timeout /t 3 /nobreak >nul
 
-:: CORS 허용 설정
+echo Setting CORS environment variable...
 set OLLAMA_ORIGINS=*
 
-:: Ollama가 설치되어 있는지 확인
 where ollama >nul 2>&1
 if %errorlevel% neq 0 (
     echo.
-    echo [오류] Ollama가 설치되지 않았습니다.
-    echo https://ollama.com/download 에서 먼저 설치해주세요.
+    echo [ERROR] Ollama is not installed.
+    echo Please install from https://ollama.com/download
     echo.
     pause
     exit /b 1
 )
 
-:: 모델이 있는지 확인하고 없으면 다운로드 안내
 echo.
-echo 설치된 모델 목록:
+echo Installed models:
 ollama list
 echo.
 
-:: Ollama 서버 시작
-echo Ollama 서버를 시작합니다...
-echo 이 창을 닫지 마세요!
+echo ========================================
+echo Starting Ollama server...
+echo DO NOT CLOSE THIS WINDOW!
 echo.
-echo 웹 브라우저에서 "다시 연결 시도" 버튼을 클릭하세요.
+echo Click "Retry Connection" button in browser.
 echo ========================================
 echo.
 
 ollama serve
 `;
 
-            const blob = new Blob([batContent], { type: 'application/bat' });
+            const blob = new Blob([batContent], { type: 'text/plain;charset=ascii' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
