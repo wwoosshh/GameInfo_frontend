@@ -420,6 +420,32 @@
             background: #3b82f6;
         }
 
+        .download-bat-btn {
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .download-bat-btn:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+
+        .download-bat-btn::before {
+            content: '⬇️';
+        }
+
         /* 설정 모달 */
         .modal-overlay {
             position: fixed;
@@ -673,23 +699,29 @@
         <div id="ollama-not-connected" class="ollama-not-connected" style="display: none;">
             <div class="ollama-icon">🦙</div>
             <h2>Ollama에 연결할 수 없습니다</h2>
-            <p>AI 채팅을 사용하려면 로컬에 Ollama가 설치되어 있어야 합니다.</p>
+            <p>AI 채팅을 사용하려면 로컬에 Ollama가 설치되고 웹 접근이 허용되어야 합니다.</p>
 
             <div class="ollama-steps">
-                <h3>설치 방법</h3>
+                <h3>간단 설정 (Windows)</h3>
                 <ol>
-                    <li><a href="https://ollama.com/download" target="_blank">Ollama 다운로드</a> 페이지에서 설치 파일을 다운로드합니다.</li>
-                    <li>설치 후 터미널에서 모델을 다운로드합니다:
-                        <br><code>ollama pull llama3.2</code>
-                    </li>
-                    <li>CORS 설정을 위해 환경변수를 설정합니다:
-                        <br><code>set OLLAMA_ORIGINS=*</code> (Windows)
-                        <br><code>export OLLAMA_ORIGINS=*</code> (Mac/Linux)
-                    </li>
-                    <li>Ollama 서버를 재시작합니다:
-                        <br><code>ollama serve</code>
-                    </li>
+                    <li>Ollama가 없다면 <a href="https://ollama.com/download" target="_blank">여기서 설치</a></li>
+                    <li>아래 버튼을 클릭하여 실행 파일 다운로드</li>
+                    <li>다운로드된 <strong>ollama_start.bat</strong> 파일을 더블클릭하여 실행</li>
+                    <li>"다시 연결 시도" 버튼 클릭</li>
                 </ol>
+                <button class="download-bat-btn" onclick="downloadOllamaBat()">
+                    ollama_start.bat 다운로드
+                </button>
+
+                <details style="margin-top: 20px; text-align: left;">
+                    <summary style="cursor: pointer; color: var(--text-muted);">Mac/Linux 사용자 또는 수동 설정</summary>
+                    <div style="margin-top: 12px; padding: 12px; background: var(--bg-primary); border-radius: 8px;">
+                        <p style="margin-bottom: 8px;"><strong>Mac/Linux:</strong></p>
+                        <code style="display: block; margin-bottom: 12px;">OLLAMA_ORIGINS=* ollama serve</code>
+                        <p style="margin-bottom: 8px;"><strong>모델 다운로드:</strong></p>
+                        <code>ollama pull llama3.2</code>
+                    </div>
+                </details>
             </div>
 
             <button class="retry-btn" onclick="checkOllamaConnection()">다시 연결 시도</button>
@@ -777,6 +809,62 @@
         });
 
         // Ollama 연결 확인
+        // 배치 파일 다운로드 함수
+        function downloadOllamaBat() {
+            const batContent = `@echo off
+chcp 65001 >nul
+echo ========================================
+echo   Ollama 웹 접근 허용 모드로 시작
+echo ========================================
+echo.
+
+:: 기존 Ollama 프로세스 종료
+echo 기존 Ollama 프로세스 종료 중...
+taskkill /f /im ollama.exe >nul 2>&1
+timeout /t 2 /nobreak >nul
+
+:: CORS 허용 설정
+set OLLAMA_ORIGINS=*
+
+:: Ollama가 설치되어 있는지 확인
+where ollama >nul 2>&1
+if %errorlevel% neq 0 (
+    echo.
+    echo [오류] Ollama가 설치되지 않았습니다.
+    echo https://ollama.com/download 에서 먼저 설치해주세요.
+    echo.
+    pause
+    exit /b 1
+)
+
+:: 모델이 있는지 확인하고 없으면 다운로드 안내
+echo.
+echo 설치된 모델 목록:
+ollama list
+echo.
+
+:: Ollama 서버 시작
+echo Ollama 서버를 시작합니다...
+echo 이 창을 닫지 마세요!
+echo.
+echo 웹 브라우저에서 "다시 연결 시도" 버튼을 클릭하세요.
+echo ========================================
+echo.
+
+ollama serve
+`;
+
+            const blob = new Blob([batContent], { type: 'application/bat' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ollama_start.bat';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
         async function checkOllamaConnection() {
             try {
                 const response = await fetch(`${OLLAMA_BASE_URL}/api/tags`, {
