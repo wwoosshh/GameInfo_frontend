@@ -585,6 +585,18 @@ const API = {
             const queryParams = new URLSearchParams({ q: query, ...params }).toString();
             return API.request(`/search?${queryParams}`);
         },
+
+        /**
+         * 자동완성 (초성검색 지원)
+         *
+         * @param {string} query - 검색어
+         * @param {number} limit - 결과 개수
+         * @returns {Promise}
+         */
+        async autocomplete(query, limit = 10) {
+            const queryParams = new URLSearchParams({ q: query, limit }).toString();
+            return API.request(`/autocomplete?${queryParams}`);
+        },
     },
 
     /**

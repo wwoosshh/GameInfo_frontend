@@ -74,6 +74,128 @@
             color: var(--text-primary);
         }
 
+        /* 자동완성 드롭다운 */
+        .autocomplete-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border: 1px solid var(--divider);
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .autocomplete-dropdown.show {
+            display: block;
+        }
+
+        .autocomplete-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: var(--transition);
+            border-bottom: 1px solid var(--divider);
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item:hover,
+        .autocomplete-item.selected {
+            background: var(--bg-hover);
+        }
+
+        .autocomplete-item-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            object-fit: cover;
+            background: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .autocomplete-item-icon img {
+            width: 100%;
+            height: 100%;
+            border-radius: 6px;
+            object-fit: cover;
+        }
+
+        .autocomplete-item-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .autocomplete-item-text {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .autocomplete-item-text mark {
+            background: rgba(96, 165, 250, 0.3);
+            color: var(--accent-blue);
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        .autocomplete-item-subtext {
+            font-size: 12px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .autocomplete-item-type {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: var(--bg-primary);
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .autocomplete-item-type.game {
+            background: rgba(96, 165, 250, 0.2);
+            color: var(--accent-blue);
+        }
+
+        .autocomplete-item-type.version {
+            background: rgba(52, 211, 153, 0.2);
+            color: var(--accent-green);
+        }
+
+        .autocomplete-item-type.item {
+            background: rgba(251, 191, 36, 0.2);
+            color: var(--accent-yellow);
+        }
+
+        .autocomplete-hint {
+            padding: 8px 16px;
+            font-size: 11px;
+            color: var(--text-muted);
+            background: var(--bg-primary);
+            border-top: 1px solid var(--divider);
+        }
+
         /* 검색 결과 */
         .search-results {
             margin-top: 32px;
@@ -331,11 +453,17 @@
                             type="text"
                             id="search-input"
                             class="search-input"
-                            placeholder="검색어를 입력하세요... (게임, 버전, 캐릭터, 아이템)"
+                            placeholder="검색어를 입력하세요... (게임, 버전, 캐릭터, 아이템, 초성검색 지원)"
                             autocomplete="off"
                         >
                         <button id="search-clear" class="search-clear">&times;</button>
                         <span class="search-icon">&#128269;</span>
+
+                        <!-- 자동완성 드롭다운 -->
+                        <div id="autocomplete-dropdown" class="autocomplete-dropdown">
+                            <div id="autocomplete-list"></div>
+                            <div class="autocomplete-hint">↑↓ 이동 · Enter 선택 · Esc 닫기 · 초성검색 지원 (ㄱㄴㄷ)</div>
+                        </div>
                     </div>
                 </div>
 
@@ -376,13 +504,16 @@
     </footer>
 
     <!-- JavaScript -->
-    <script src="../js/api.js"></script>
+    <script src="../js/api.js?v=2"></script>
     <script src="../js/navigation.js"></script>
     <script>
         // 검색 관련 변수
         let searchTimeout = null;
+        let autocompleteTimeout = null;
         let currentSearchQuery = '';
         let currentSearchPage = 1;
+        let selectedAutocompleteIndex = -1;
+        let autocompleteResults = [];
 
         // 페이지 로드 시 초기화
         document.addEventListener('DOMContentLoaded', () => {
@@ -394,6 +525,7 @@
         function initSearch() {
             const searchInput = document.getElementById('search-input');
             const searchClear = document.getElementById('search-clear');
+            const autocompleteDropdown = document.getElementById('autocomplete-dropdown');
 
             // 입력 이벤트 (디바운싱 적용)
             searchInput.addEventListener('input', (e) => {
@@ -402,37 +534,215 @@
                 // 클리어 버튼 표시/숨김
                 searchClear.classList.toggle('show', query.length > 0);
 
-                // 디바운싱: 300ms 후에 검색 실행
+                // 자동완성 초기화
+                selectedAutocompleteIndex = -1;
+
+                // 디바운싱: 150ms 후에 자동완성 실행
+                clearTimeout(autocompleteTimeout);
                 clearTimeout(searchTimeout);
 
                 if (query.length === 0) {
+                    hideAutocomplete();
                     hideSearchResults();
                     return;
                 }
 
-                searchTimeout = setTimeout(() => {
-                    performSearch(query, 1);
-                }, 300);
+                // 자동완성 (더 빠르게)
+                autocompleteTimeout = setTimeout(() => {
+                    fetchAutocomplete(query);
+                }, 150);
             });
 
-            // Enter 키로 즉시 검색
-            searchInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    clearTimeout(searchTimeout);
-                    const query = e.target.value.trim();
-                    if (query.length > 0) {
-                        performSearch(query, 1);
+            // 키보드 네비게이션
+            searchInput.addEventListener('keydown', (e) => {
+                const isDropdownVisible = autocompleteDropdown.classList.contains('show');
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    if (isDropdownVisible && autocompleteResults.length > 0) {
+                        selectedAutocompleteIndex = Math.min(selectedAutocompleteIndex + 1, autocompleteResults.length - 1);
+                        updateAutocompleteSelection();
                     }
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (isDropdownVisible && autocompleteResults.length > 0) {
+                        selectedAutocompleteIndex = Math.max(selectedAutocompleteIndex - 1, -1);
+                        updateAutocompleteSelection();
+                    }
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (isDropdownVisible && selectedAutocompleteIndex >= 0) {
+                        // 선택된 자동완성 항목 클릭
+                        selectAutocompleteItem(autocompleteResults[selectedAutocompleteIndex]);
+                    } else {
+                        // 일반 검색 실행
+                        clearTimeout(searchTimeout);
+                        clearTimeout(autocompleteTimeout);
+                        hideAutocomplete();
+                        const query = searchInput.value.trim();
+                        if (query.length > 0) {
+                            performSearch(query, 1);
+                        }
+                    }
+                } else if (e.key === 'Escape') {
+                    hideAutocomplete();
                 }
+            });
+
+            // 포커스 아웃 시 자동완성 닫기 (약간의 딜레이)
+            searchInput.addEventListener('blur', () => {
+                setTimeout(() => {
+                    hideAutocomplete();
+                }, 200);
             });
 
             // 클리어 버튼
             searchClear.addEventListener('click', () => {
                 searchInput.value = '';
                 searchClear.classList.remove('show');
+                hideAutocomplete();
                 hideSearchResults();
                 searchInput.focus();
             });
+
+            // 문서 클릭 시 자동완성 닫기
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.search-container')) {
+                    hideAutocomplete();
+                }
+            });
+        }
+
+        // 자동완성 API 호출
+        async function fetchAutocomplete(query) {
+            try {
+                const response = await API.search.autocomplete(query, 8);
+
+                if (response.success) {
+                    autocompleteResults = response.data.suggestions;
+                    displayAutocomplete(autocompleteResults, query, response.data.is_chosung);
+                }
+            } catch (error) {
+                console.error('Autocomplete error:', error);
+                hideAutocomplete();
+            }
+        }
+
+        // 자동완성 결과 표시
+        function displayAutocomplete(suggestions, query, isChosung) {
+            const dropdown = document.getElementById('autocomplete-dropdown');
+            const list = document.getElementById('autocomplete-list');
+
+            if (suggestions.length === 0) {
+                hideAutocomplete();
+                return;
+            }
+
+            const typeNames = {
+                'game': '게임',
+                'version': '버전',
+                'item': '항목'
+            };
+
+            const typeIcons = {
+                'game': '🎮',
+                'version': '📦',
+                'item': '⭐'
+            };
+
+            list.innerHTML = suggestions.map((item, index) => {
+                // 검색어 하이라이트
+                const highlightedText = highlightMatch(item.text, query, isChosung);
+
+                // 아이콘
+                let iconHtml = '';
+                if (item.icon) {
+                    iconHtml = `<img src="${item.icon}" alt="">`;
+                } else {
+                    iconHtml = typeIcons[item.type] || '📄';
+                }
+
+                return `
+                    <div class="autocomplete-item ${index === selectedAutocompleteIndex ? 'selected' : ''}"
+                         data-index="${index}"
+                         onmousedown="selectAutocompleteItem(autocompleteResults[${index}])">
+                        <div class="autocomplete-item-icon">${iconHtml}</div>
+                        <div class="autocomplete-item-content">
+                            <div class="autocomplete-item-text">${highlightedText}</div>
+                            ${item.subtext ? `<div class="autocomplete-item-subtext">${escapeHtml(item.subtext)}</div>` : ''}
+                        </div>
+                        <span class="autocomplete-item-type ${item.type}">${typeNames[item.type] || item.type}</span>
+                    </div>
+                `;
+            }).join('');
+
+            dropdown.classList.add('show');
+        }
+
+        // 검색어 하이라이트
+        function highlightMatch(text, query, isChosung) {
+            if (!text || !query) return escapeHtml(text);
+
+            const escapedText = escapeHtml(text);
+
+            if (isChosung) {
+                // 초성 검색의 경우 원본 텍스트 그대로 표시 (하이라이트 없음)
+                return escapedText;
+            }
+
+            // 대소문자 무시 매칭
+            const lowerText = text.toLowerCase();
+            const lowerQuery = query.toLowerCase();
+            const index = lowerText.indexOf(lowerQuery);
+
+            if (index === -1) return escapedText;
+
+            const before = escapeHtml(text.substring(0, index));
+            const match = escapeHtml(text.substring(index, index + query.length));
+            const after = escapeHtml(text.substring(index + query.length));
+
+            return `${before}<mark>${match}</mark>${after}`;
+        }
+
+        // 자동완성 선택 업데이트
+        function updateAutocompleteSelection() {
+            const items = document.querySelectorAll('.autocomplete-item');
+            items.forEach((item, index) => {
+                item.classList.toggle('selected', index === selectedAutocompleteIndex);
+            });
+
+            // 선택된 항목이 보이도록 스크롤
+            if (selectedAutocompleteIndex >= 0) {
+                items[selectedAutocompleteIndex]?.scrollIntoView({ block: 'nearest' });
+            }
+        }
+
+        // 자동완성 항목 선택
+        function selectAutocompleteItem(item) {
+            const searchInput = document.getElementById('search-input');
+
+            hideAutocomplete();
+
+            if (item.type === 'game') {
+                // 게임 선택 시 해당 게임의 버전 목록으로 이동
+                window.location.href = `game_versions.html?game_id=${item.id}`;
+            } else if (item.type === 'version') {
+                // 버전 선택 시 버전 상세로 이동
+                window.location.href = `version_detail.html?version_id=${item.id}`;
+            } else if (item.type === 'item') {
+                // 항목 선택 시 해당 버전으로 이동
+                window.location.href = `version_detail.html?version_id=${item.version_id}`;
+            } else {
+                // 기본: 검색 실행
+                searchInput.value = item.text;
+                performSearch(item.text, 1);
+            }
+        }
+
+        // 자동완성 숨기기
+        function hideAutocomplete() {
+            document.getElementById('autocomplete-dropdown').classList.remove('show');
+            selectedAutocompleteIndex = -1;
         }
 
         // 검색 실행
